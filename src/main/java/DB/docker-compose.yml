@@ -1,0 +1,22 @@
+## YAML Template.
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_edext
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: edext_db
+      MYSQL_USER: edext          # Nombre de tu usuario personalizado
+      MYSQL_PASSWORD: edext   # Contraseña para ese usuario
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Mapeo usando tu carpeta 'persistencia'
+      - ./DB/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+
+volumes:
+  mysql_data:
