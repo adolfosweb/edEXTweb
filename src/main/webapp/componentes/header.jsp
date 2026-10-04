@@ -1,27 +1,28 @@
 <%-- 
     Document   : header
-    Created on : Sep 25, 2026, 5:34:32 PM
+    Created on : Sep 25, 2026, 5:34:32?PM
     Author     : adolfo
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-
-<!DOCTYPE html>
-
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>edExt - Plataforma de Educación Virtual (Tarea 2)</title>
-  <!-- Bootstrap 5 CSS // Actualizo a ultima version @adolfo -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Iconos de Bootstrap // Actualizo a ulitma version @adolfo -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  
-  <style>
-    .avatar-sm { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-    .avatar-lg { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
-    .course-card-img { height: 180px; object-fit: cover; }
-  </style>
-</head>
-</html>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+    <div class="container-fluid px-4">
+        <!-- Nombre de la plataforma -->
+        <a class="navbar-brand fw-bold" href="#">
+            <i class="bi bi-mortarboard-fill me-2"></i>
+            edExt
+        </a>
+        <!-- Buscador -->
+        <form class="d-flex flex-grow-1 mx-lg-4 my-3 my-lg-0"style="max-width: 450px;"role="search"action="#"method="get">
+            <input class="form-control me-2"type="search"name="busqueda"
+                   placeholder="Buscar cursos y programas..."aria-label="Buscar cursos y programas">
+            <button class="btn btn-outline-light" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+        </form>
+        <!-- Usuario -->
+        <div class="d-flex align-items-center gap-3">
+            <a href="#" class="btn btn-outline-light">Iniciar sesi�n</a>
+            <img src="https://placehold.co/40x40"alt="Foto de perfil"class="avatar-sm">
+        </div>
+    </div>
+</nav>
