@@ -39,10 +39,14 @@
     <!-- Encabezado reutilizable -->
     <jsp:include page="header.jsp" />
     <!-- Contenido principal -->
-    <main class="container py-5">
-        <h1>Bienvenido a edExt</h1>
-        <p class="text-secondary">Pagina de prueba.</p>
-    </main>
+    <div class="d-flex">
+        <!-- Menu lateral reutilizable -->
+        <jsp:include page="menulateral.jsp" />
+        <main class="container bg-light">
+            <h1>Bienvenido a edExt</h1>
+            <p class="text-dark">Pagina de prueba.</p>
+        </main>
+    </div>
     <!-- JavaScript de Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
