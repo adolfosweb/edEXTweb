@@ -150,6 +150,42 @@ public boolean altaUsuario(Usuario usuario, String nombreInstituto) {
         em.close();
     }
 }
+    @Override
+    public Usuario iniciarSesion(String identificador, String password) {
+
+        if (identificador == null || identificador.trim().isEmpty()
+                || password == null || password.trim().isEmpty()) {
+            return null;
+        }
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+
+        try {
+
+            List<Usuario> usuarios = em.createQuery(
+                    "SELECT u FROM Usuario u "
+                    + "WHERE u.nickname = :identificador "
+                    + "OR u.correoElectronico = :identificador",
+                    Usuario.class
+            ).setParameter("identificador", identificador)
+             .getResultList();
+
+            if (usuarios.isEmpty()) {
+                return null;
+            }
+
+            Usuario usuario = usuarios.get(0);
+
+            if (!password.equals(usuario.getPassword())) {
+                return null;
+            }
+
+            return usuario;
+
+        } finally {
+            em.close();
+        }
+    }
 
     @Override
     public void modificarUsuario(Usuario usuario) {
