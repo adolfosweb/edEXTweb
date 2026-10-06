@@ -20,45 +20,11 @@
             </button>
         </form>
         <!-- Usuario -->
-        <%
-            Logica.Usuario usuario = (Logica.Usuario) session.getAttribute("usuario");
-        %>
-
         <div class="d-flex align-items-center gap-3">
-
-            <% if (usuario != null) { %>
-
-                <span class="text-white">
-                    <%= usuario.getNickname() %>
-                </span>
-
-                <div class="vr border border-light border-1 opacity-100"></div>
-
-                <a href="${pageContext.request.contextPath}/LogoutServlet"
-                    class="btn btn-outline-light">
-                     Cerrar sesión
-                </a>
-
-                <img src="https://placehold.co/40x40"
-                     alt="Foto de perfil"
-                     class="avatar-sm">
-
-            <% } else { %>
-
-                <a href="${pageContext.request.contextPath}/componentes/login.jsp"
-                class="btn btn-outline-light">
-                 Iniciar sesión
-                </a>
-
-                <div class="vr border border-light border-1 opacity-100"></div>
-
-                <a href="${pageContext.request.contextPath}/RegistroServlet"
-                   class="btn btn-outline-light">
-                    Registrarse
-                </a>
-
-            <% } %>
-
+            <a href="#" class="btn btn-outline-light">Iniciar sesión</a>
+            <div class="vr border border-light border-1 opacity-100"></div>
+            <a href="#" class="btn btn-outline-light">Registrarse</a>
+            <img src="https://placehold.co/40x40"alt="Foto de perfil"class="avatar-sm">
         </div>
     </div>
 </nav>

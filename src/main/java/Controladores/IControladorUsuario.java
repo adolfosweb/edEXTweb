@@ -15,8 +15,6 @@ public interface IControladorUsuario {
     boolean altaUsuario(Usuario usuario, String nombreInstituto);
 
     Usuario buscarUsuario(String nickname);
-    
-    Usuario iniciarSesion(String identificador, String password);
 
     void modificarUsuario(Usuario usuario);
 
