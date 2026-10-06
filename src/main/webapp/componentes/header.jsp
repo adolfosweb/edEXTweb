@@ -7,7 +7,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
     <div class="container-fluid px-4">
         <!-- Nombre de la plataforma -->
-        <a class="navbar-brand fw-bold" href="#">
+        <a class="navbar-brand fw-bold" href="principal.jsp">
             <i class="bi bi-mortarboard-fill me-2"></i>
             edExt
         </a>

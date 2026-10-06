@@ -24,4 +24,12 @@
             <li class="mb-1"><a href="#" class="text-decoration-none text-white">Informática</a></li>
         </ul>
     </div>
+    <hr class="border border-light border-1 opacity-100">
+    <!--Parte para probar llamando desde principal (Se elimina) -->
+    <div>
+        <h6 class="text-uppercase text-secondary fw-bold text-white">Pruebas</h6>
+        <ul class="list-unstyled">
+            <li class="mb-1"><a href="crearPrograma.jsp" class="text-decoration-none text-white">Crear Programa</a></li>
+        </ul>
+    </div>
 </aside>
