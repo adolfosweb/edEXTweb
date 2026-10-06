@@ -24,6 +24,7 @@ public class Usuario implements Serializable {
     private String nombre;
     private String apellido;
     private LocalDate fecNac;
+    private String password;
 
     public Usuario() {
     }
@@ -76,6 +77,14 @@ public class Usuario implements Serializable {
 
     public void setFecNac(LocalDate fecNac) {
         this.fecNac = fecNac;
+    }
+    
+    public String getPassword(){
+        return password;
+    }
+    
+    public void setPassword(String password){
+        this.password = password;
     }
 
     @Override
