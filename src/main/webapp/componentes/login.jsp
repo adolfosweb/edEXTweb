@@ -26,7 +26,7 @@
 
             <div class="card shadow">
 
-                <div class="card-body p-4 bg-dark">
+                <div class="card-body p-4">
 
                     <h2 class="text-center mb-4">
                         Iniciar sesión
