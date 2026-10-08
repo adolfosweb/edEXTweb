@@ -7,6 +7,10 @@ import Logica.Curso;
 import Logica.EdicionCurso;
 import Logica.InscripcionCurso;
 import java.util.Map;
+import Datatypes.DTCurso;
+import Datatypes.DTEdicionCurso;
+import Datatypes.DTProgramaFormacion;
+import java.util.List;
 
 /**
  *
@@ -33,5 +37,16 @@ public interface IControladorCurso {
     InscripcionCurso buscarInscripcion(String nickEstudiante, String nombreEdicion);
 
     boolean inscribirEstudiante(InscripcionCurso inscripcion);
+    
+    //Agregado para trabajar con servlets
+    
+    List<DTCurso> obtenerListaCursosDT();
+    
+    DTCurso obtenerInformacionCurso(String nombre);
+    
+    List<DTEdicionCurso> obtenerEdicionesCurso(String nombreCurso);
+    
+    List<DTProgramaFormacion> obtenerProgramasCurso(String nombreCurso);
+    
     
 }

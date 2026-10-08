@@ -23,4 +23,5 @@ public interface IControladorUsuario {
     void eliminarUsuario(String nickname);
 
     Map<String, Usuario> listarUsuarios();
+    
 }

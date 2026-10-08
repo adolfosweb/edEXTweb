@@ -10,6 +10,9 @@ import jakarta.persistence.EntityTransaction;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+
+
 
 public class ControladorCurso implements IControladorCurso {
 
@@ -288,5 +291,110 @@ public class ControladorCurso implements IControladorCurso {
             em.close();
         }
     }
+    
+    
+   //Metodos con Datatypes para version WEB
+    
+    
+    @Override
+public List<Datatypes.DTCurso> obtenerListaCursosDT() {
+    Map<String, Logica.Curso> mapaCursos = listarCursos(); // Tu método existente
+    List<Datatypes.DTCurso> resultado = new ArrayList<>();
+
+    for (Logica.Curso c : mapaCursos.values()) {
+        List<String> previasStr = new ArrayList<>();
+        if (c.getPrevias() != null) {
+            for (Logica.Curso previa : c.getPrevias()) {
+                previasStr.add(previa.getNombre());
+            }
+        }
+
+        resultado.add(new Datatypes.DTCurso(
+            c.getNombre(),
+            c.getDescripcion(),
+            c.getDuracion(),
+            c.getCantHoras(),
+            c.getCantCreditos(),
+            c.getFecRegistro(),
+            c.getUrl(),
+            c.getInstituto() != null ? c.getInstituto().getNombre() : "Sin Instituto",
+            null,
+            previasStr,
+            new ArrayList<String>()
+        ));
+    }
+    return resultado;
+}
+    
+    
+    @Override
+    public Datatypes.DTCurso obtenerInformacionCurso(String nombre) {
+        Logica.Curso c = buscarCurso(nombre);
+        if (c == null) return null;
+
+        List<String> previasStr = new ArrayList<>();
+        if (c.getPrevias() != null) {
+            for (Logica.Curso previa : c.getPrevias()) {
+                previasStr.add(previa.getNombre());
+            }
+        }
+
+        return new Datatypes.DTCurso(
+            c.getNombre(),
+            c.getDescripcion(),
+            c.getDuracion(),
+            c.getCantHoras(),
+            c.getCantCreditos(),
+            c.getFecRegistro(),
+            c.getUrl(),
+            c.getInstituto() != null ? c.getInstituto().getNombre() : null,
+            null,                       // Imagen
+            previasStr,                 // Previas
+            new ArrayList<String>()     // Categorías
+        );
+    }
+
+    @Override
+    public List<Datatypes.DTEdicionCurso> obtenerEdicionesCurso(String nombreCurso) {
+        Logica.Curso c = buscarCurso(nombreCurso);
+        List<Datatypes.DTEdicionCurso> resultado = new ArrayList<>();
+        if (c != null && c.getEdiciones() != null) {
+            for (Logica.EdicionCurso ed : c.getEdiciones()) {
+                resultado.add(new Datatypes.DTEdicionCurso(
+                    ed.getNombre(),
+                    ed.getFechaInicio(),
+                    ed.getFechaFin(),
+                    ed.getCupo(),
+                    ed.getFechaPublicacion(),
+                    c.getNombre(),
+                    null,
+                    new ArrayList<>()
+                ));
+            }
+        }
+        return resultado;
+    }
+
+    @Override
+    public List<Datatypes.DTProgramaFormacion> obtenerProgramasCurso(String nombreCurso) {
+        Logica.Curso c = buscarCurso(nombreCurso);
+        List<Datatypes.DTProgramaFormacion> resultado = new ArrayList<>();
+        if (c != null && c.getProgramas() != null) {
+            for (Logica.ProgramaFormacion p : c.getProgramas()) {
+                resultado.add(new Datatypes.DTProgramaFormacion(
+                    p.getNombre(),
+                    p.getDescripcion(),
+                    p.getFechaInicio(),
+                    p.getFechaFin(),
+                    p.getFechaAlta(),
+                    null,
+                    new ArrayList<>(),
+                    new ArrayList<>()
+                ));
+            }
+        }
+        return resultado;
+}
+    
 }
 

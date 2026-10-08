@@ -24,4 +24,14 @@
             <li class="mb-1"><a href="#" class="text-decoration-none text-white">Informática</a></li>
         </ul>
     </div>
+        <hr class="border border-light border-1 opacity-100">
+    <!-- Curso -->
+    <div>
+        <h6 class="text-uppercase text-secondary fw-bold text-white">Menu Opciones <br>(segun tipo usuario)</h6>
+        <ul class="list-unstyled">
+            <li class="mb-1"><a href="principal.jsp?contenido=altaCurso" class="text-decoration-none text-white">Alta Curso</a></li>
+            <li class="mb-1"><a href="principal.jsp?contenido=listarCursos" class="text-decoration-none text-white">Listar Curso</a></li>
+            <li class="mb-1"><a href="<%= request.getContextPath() %>/ConsultaCurso?nombre=Dalavuelta">Ver Curso Programación</a></li>
+        </ul>
+    </div>
 </aside>
