@@ -27,9 +27,24 @@
     <hr class="border border-light border-1 opacity-100">
     <!--Parte para probar llamando desde principal (Se elimina) -->
     <div>
-        <h6 class="text-uppercase text-secondary fw-bold text-white">Pruebas</h6>
-        <ul class="list-unstyled">
-            <li class="mb-1"><a href="crearPrograma.jsp" class="text-decoration-none text-white">Crear Programa</a></li>
-        </ul>
-    </div>
+    <h6 class="text-uppercase text-secondary fw-bold text-white">
+        Pruebas
+    </h6>
+
+    <ul class="list-unstyled">
+        <li class="mb-1">
+            <a href="crearPrograma.jsp"
+               class="text-decoration-none text-white">
+                Crear Programa
+            </a>
+        </li>
+
+        <li class="mb-1">
+            <a href="<%= request.getContextPath() %>/ConsultaUsuarioServlet"
+               class="text-decoration-none text-white">
+                Buscar Usuarios
+            </a>
+        </li>
+    </ul>
+</div>
 </aside>

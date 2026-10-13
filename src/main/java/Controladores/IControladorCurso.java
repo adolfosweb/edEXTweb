@@ -34,4 +34,6 @@ public interface IControladorCurso {
 
     boolean inscribirEstudiante(InscripcionCurso inscripcion);
     
+    boolean cambiarEstadoInscripcion(Long idInscripcion, Logica.EstadoInscripcion estado);
+    
 }

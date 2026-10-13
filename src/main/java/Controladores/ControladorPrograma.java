@@ -11,6 +11,9 @@ import Logica.Curso;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import Logica.Estudiante;
+import Logica.InscripcionPrograma;
+import Logica.EstadoInscripcion;
 
 /**
  *
@@ -193,6 +196,141 @@ public Map<String, ProgramaFormacion> listarProgramas() {
             e.printStackTrace();
             return false;
         }finally{
+            em.close();
+        }
+    }
+    
+    @Override
+    public InscripcionPrograma buscarInscripcionPrograma(String nickEstudiante, String nombrePrograma) {
+
+        if (nickEstudiante == null || nombrePrograma == null) {
+            return null;
+        }
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+
+        try {
+            String jpql = "SELECT i FROM InscripcionPrograma i "
+                    + "WHERE i.estudianteInscripto.nickname = :nick "
+                    + "AND i.programaInscripto.nombre = :programa";
+
+            List<InscripcionPrograma> lista = em.createQuery(
+                    jpql, InscripcionPrograma.class)
+                    .setParameter("nick", nickEstudiante)
+                    .setParameter("programa", nombrePrograma)
+                    .getResultList();
+
+            return lista.isEmpty() ? null : lista.get(0);
+
+        } finally {
+            em.close();
+        }
+    }
+    
+    @Override
+    public boolean inscribirEstudiantePrograma(InscripcionPrograma inscripcion) {
+
+        if (inscripcion == null
+                || inscripcion.getEstudiante() == null
+                || inscripcion.getPrograma() == null) {
+            return false;
+        }
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            Estudiante estudiante = em.find(
+                    Estudiante.class,
+                    inscripcion.getEstudiante().getNickname());
+
+            ProgramaFormacion programa = em.find(
+                    ProgramaFormacion.class,
+                    inscripcion.getPrograma().getNombre());
+
+            if (estudiante == null || programa == null) {
+                tx.rollback();
+                return false;
+            }
+
+            String jpql = "SELECT i FROM InscripcionPrograma i "
+                    + "WHERE i.estudianteInscripto.nickname = :nick "
+                    + "AND i.programaInscripto.nombre = :programa";
+
+            List<InscripcionPrograma> existentes = em.createQuery(
+                    jpql, InscripcionPrograma.class)
+                    .setParameter("nick", estudiante.getNickname())
+                    .setParameter("programa", programa.getNombre())
+                    .getResultList();
+
+            if (!existentes.isEmpty()) {
+                tx.rollback();
+                return false;
+            }
+
+            inscripcion.setEstudiante(estudiante);
+            inscripcion.setPrograma(programa);
+
+            if (inscripcion.getEstado() == null) {
+                inscripcion.setEstado(EstadoInscripcion.INSCRIPTO);
+            }
+
+            em.persist(inscripcion);
+
+            tx.commit();
+            return true;
+
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+
+            e.printStackTrace();
+            return false;
+
+        } finally {
+            em.close();
+        }
+    }
+    
+    @Override
+    public boolean cambiarEstadoInscripcionPrograma(
+            Long idInscripcion, Logica.EstadoInscripcion estado) {
+
+        if (idInscripcion == null || estado == null) {
+            return false;
+        }
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            InscripcionPrograma inscripcion =
+                    em.find(InscripcionPrograma.class, idInscripcion);
+
+            if (inscripcion == null) {
+                tx.rollback();
+                return false;
+            }
+
+            inscripcion.setEstado(estado);
+
+            tx.commit();
+            return true;
+
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+
+            e.printStackTrace();
+            return false;
+
+        } finally {
             em.close();
         }
     }

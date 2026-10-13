@@ -4,6 +4,7 @@
  */
 package Controladores;
 import Logica.ProgramaFormacion;
+import Logica.InscripcionPrograma;
 import java.util.Map;
 
 /**
@@ -23,6 +24,12 @@ public interface IControladorPrograma {
     Map<String, ProgramaFormacion> listarProgramas();
     
     boolean agregarCurso(String nombrePrograma, String nombreCurso);
+    
+    InscripcionPrograma buscarInscripcionPrograma(String nickEstudiante, String nombrePrograma);
+    
+    boolean inscribirEstudiantePrograma(InscripcionPrograma inscripcion);
+    
+    boolean cambiarEstadoInscripcionPrograma(Long idInscripcion, Logica.EstadoInscripcion estado);
 }
     
 
