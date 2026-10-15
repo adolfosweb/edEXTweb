@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,6 +52,9 @@ public class AltaCurso extends HttpServlet {
         }
 
         prepararFormulario(request, docente, controladorCurso, cursoFormulario, modoEdicion);
+        request.setAttribute("fechaRegistro", modoEdicion && cursoFormulario.getFecRegistro() != null
+                ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(cursoFormulario.getFecRegistro())
+                : LocalDate.now().toString());
         request.setAttribute("mostrarExito", "1".equals(request.getParameter("creado")));
         request.getRequestDispatcher("/componentes/cursos/altaCurso.jsp").forward(request, response);
     }
@@ -69,8 +74,25 @@ public class AltaCurso extends HttpServlet {
         String duracion = limpiar(request.getParameter("duracion"));
         String url = limpiar(request.getParameter("url"));
         String institutoNombre = limpiar(request.getParameter("instituto"));
+        String fechaRegistroTexto = limpiar(request.getParameter("fechaRegistro"));
         boolean modoEdicion = "editar".equals(request.getParameter("modo"));
         String error = validarCampos(nombre, descripcion, duracion, url, institutoNombre);
+
+        LocalDate fechaRegistro = null;
+        if (error == null && !modoEdicion) {
+            if (fechaRegistroTexto == null || fechaRegistroTexto.isEmpty()) {
+                error = "Selecciona la fecha de registro del curso.";
+            } else {
+                try {
+                    fechaRegistro = LocalDate.parse(fechaRegistroTexto);
+                    if (fechaRegistro.isBefore(LocalDate.now())) {
+                        error = "La fecha de registro no puede ser anterior a hoy.";
+                    }
+                } catch (DateTimeParseException ex) {
+                    error = "Selecciona una fecha de registro válida.";
+                }
+            }
+        }
 
         if (error == null && !docenteTieneInstituto(docente, institutoNombre)) {
             error = "Selecciona uno de los institutos asociados a tu cuenta docente.";
@@ -132,13 +154,19 @@ public class AltaCurso extends HttpServlet {
                     url, institutoNombre);
             request.setAttribute("previasSeleccionadas", request.getParameterValues("previas"));
             prepararFormulario(request, docente, controladorCurso, cursoFormulario, modoEdicion);
+            request.setAttribute("fechaRegistro", modoEdicion && cursoExistente != null
+                    && cursoExistente.getFecRegistro() != null
+                    ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(cursoExistente.getFecRegistro())
+                    : fechaRegistroTexto == null || fechaRegistroTexto.isEmpty()
+                            ? LocalDate.now().toString() : fechaRegistroTexto);
             request.setAttribute("cursoDuplicado", Boolean.TRUE.equals(request.getAttribute("cursoDuplicado")));
             request.getRequestDispatcher("/componentes/cursos/altaCurso.jsp").forward(request, response);
             return;
         }
 
         Curso curso = new Curso(nombre, descripcion, duracion, cantHoras, cantCreditos,
-                modoEdicion ? cursoExistente.getFecRegistro() : new Date(), url);
+                modoEdicion ? cursoExistente.getFecRegistro()
+                        : java.sql.Date.valueOf(fechaRegistro), url);
         curso.setInstituto(new Instituto(institutoNombre));
         curso.setPrevias(previas);
 
@@ -153,6 +181,10 @@ public class AltaCurso extends HttpServlet {
             prepararFormulario(request, docente, controladorCurso,
                     crearDtCurso(nombre, descripcion, duracion, cantHoras, cantCreditos, url, institutoNombre),
                     modoEdicion);
+            request.setAttribute("fechaRegistro", modoEdicion && cursoExistente != null
+                    && cursoExistente.getFecRegistro() != null
+                    ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(cursoExistente.getFecRegistro())
+                    : fechaRegistroTexto);
             request.getRequestDispatcher("/componentes/cursos/altaCurso.jsp").forward(request, response);
             return;
         }

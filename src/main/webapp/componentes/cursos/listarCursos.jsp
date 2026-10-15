@@ -1,8 +1,10 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="Datatypes.DtCurso"%>
 <%@page import="java.util.List"%>
+<%@page import="java.util.Set"%>
 <%
     List<?> cursos = (List<?>) request.getAttribute("cursos");
+    Set<?> cursosEditables = (Set<?>) request.getAttribute("cursosEditables");
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -43,6 +45,12 @@
                                href="<%= request.getContextPath() %>/SvltConsultarCurso?nombre=<%= java.net.URLEncoder.encode(curso.getNombre(), "UTF-8") %>">
                                 Ver toda la información
                             </a>
+                            <% if (cursosEditables != null && cursosEditables.contains(curso.getNombre())) { %>
+                            <a class="btn btn-outline-primary mt-2 align-self-start"
+                               href="<%= request.getContextPath() %>/SvltAltaEdicionCurso?curso=<%= java.net.URLEncoder.encode(curso.getNombre(), "UTF-8") %>">
+                                Alta de Edición
+                            </a>
+                            <% } %>
                         </div>
                     </article>
                 </div>

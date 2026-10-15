@@ -12,9 +12,11 @@ public class DtProgramaFormacion implements Serializable {
     private LocalDate fechaFin;
     private LocalDate fechaAlta;
     private List<String> nombresCursos;
+    private List<String> nombresInscriptos;
 
     public DtProgramaFormacion() {
         this.nombresCursos = new ArrayList<>();
+        this.nombresInscriptos = new ArrayList<>();
     }
 
     public DtProgramaFormacion(String nombre, String descripcion, LocalDate fechaInicio, LocalDate fechaFin, LocalDate fechaAlta) {
@@ -24,6 +26,7 @@ public class DtProgramaFormacion implements Serializable {
         this.fechaFin = fechaFin;
         this.fechaAlta = fechaAlta;
         this.nombresCursos = new ArrayList<>();
+        this.nombresInscriptos = new ArrayList<>();
     }
 
     // Getters
@@ -33,6 +36,7 @@ public class DtProgramaFormacion implements Serializable {
     public LocalDate getFechaFin() { return fechaFin; }
     public LocalDate getFechaAlta() { return fechaAlta; }
     public List<String> getNombresCursos() { return nombresCursos; }
+    public List<String> getNombresInscriptos() { return nombresInscriptos; }
 
     // Setters
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -41,4 +45,5 @@ public class DtProgramaFormacion implements Serializable {
     public void setFechaFin(LocalDate fechaFin) { this.fechaFin = fechaFin; }
     public void setFechaAlta(LocalDate fechaAlta) { this.fechaAlta = fechaAlta; }
     public void setNombresCursos(List<String> nombresCursos) { this.nombresCursos = nombresCursos; }
+    public void setNombresInscriptos(List<String> nombresInscriptos) { this.nombresInscriptos = nombresInscriptos; }
 }

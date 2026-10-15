@@ -49,10 +49,6 @@
                     </div>
                     <% } %>
 
-                    <div class="alert alert-info" role="note">
-                        Las categorías todavía no están disponibles: el modelo actual no permite asociarlas ni guardarlas.
-                    </div>
-
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-4">
                             <form action="<%= request.getContextPath() %>/AltaCurso" method="post">
@@ -97,6 +93,15 @@
                                            value="<%= escapeHtml(curso.getUrl()) %>" required>
                                 </div>
 
+                                <% if (!modoEdicion) { %>
+                                <div class="mb-3">
+                                    <label for="fechaRegistro" class="form-label">Fecha de registro</label>
+                                    <input type="date" id="fechaRegistro" name="fechaRegistro" class="form-control"
+                                           value="<%= escapeHtml((String) request.getAttribute("fechaRegistro")) %>"
+                                           min="<%= java.time.LocalDate.now() %>" required>
+                                </div>
+                                <% } %>
+
                                 <div class="mb-3">
                                     <label for="instituto" class="form-label">Instituto que brindará el curso</label>
                                     <select id="instituto" name="instituto" class="form-select" required>
@@ -128,6 +133,7 @@
                                         } %>
                                     </select>
                                     <div class="form-text">Opcional. Puedes seleccionar ninguno, uno o varios cursos.</div>
+                                    <div class="form-text">Para seleccionar varios, mantené apretado CTRL.</div>
                                 </div>
 
                                 <div class="d-flex justify-content-end gap-2">
