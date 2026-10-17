@@ -247,7 +247,9 @@ public class ControladorCurso implements IControladorCurso {
 
     @Override
     public boolean inscribirEstudiante(InscripcionCurso inscripcion) {
-        if (inscripcion == null || inscripcion.getEstudiante() == null || inscripcion.getCurso() == null) {
+        if (inscripcion == null
+                || inscripcion.getEstudiante() == null
+                || inscripcion.getCurso() == null) {
             return false;
         }
 
@@ -257,22 +259,42 @@ public class ControladorCurso implements IControladorCurso {
         try {
             tx.begin();
 
-            // 1. Re-asociar las entidades
-            Estudiante est = em.find(Estudiante.class, inscripcion.getEstudiante().getNickname());
-            EdicionCurso ed = em.find(EdicionCurso.class, inscripcion.getCurso().getNombre());
+            Estudiante est = em.find(
+                    Estudiante.class,
+                    inscripcion.getEstudiante().getNickname()
+            );
+
+            EdicionCurso ed = em.find(
+                    EdicionCurso.class,
+                    inscripcion.getCurso().getNombre()
+            );
 
             if (est == null || ed == null) {
+                tx.rollback();
+                return false;
+            }
+            InscripcionCurso existente = buscarInscripcion(
+                    est.getNickname(),
+                    ed.getNombre()
+            );
+
+            if (existente != null) {
+                tx.rollback();
                 return false;
             }
 
-            // 2. Validar que la edición tenga cupo disponible (si tiene cupo asignado > 0)
-            if (ed.getCupo() > 0 && ed.getInscriptos().size() >= ed.getCupo()) {
+
+            if (ed.getCupo() > 0
+                    && ed.getInscriptos().size() >= ed.getCupo()) {
                 tx.rollback();
-                return false; // Cupo agotado
+                return false;
             }
 
             inscripcion.setEstudiante(est);
             inscripcion.setCurso(ed);
+            if (inscripcion.getEstado() == null) {
+                inscripcion.setEstado(Logica.EstadoInscripcion.INSCRIPTO);
+            }
 
             em.persist(inscripcion);
 
@@ -280,11 +302,52 @@ public class ControladorCurso implements IControladorCurso {
             return true;
 
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) {
+            if (tx.isActive()) {
                 tx.rollback();
             }
+
             e.printStackTrace();
             return false;
+
+        } finally {
+            em.close();
+        }
+      }
+    
+    @Override
+    public boolean cambiarEstadoInscripcion(Long idInscripcion, Logica.EstadoInscripcion estado) {
+
+        if (idInscripcion == null || estado == null) {
+            return false;
+        }
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            InscripcionCurso inscripcion =
+                    em.find(InscripcionCurso.class, idInscripcion);
+
+            if (inscripcion == null) {
+                tx.rollback();
+                return false;
+            }
+
+            inscripcion.setEstado(estado);
+
+            tx.commit();
+            return true;
+
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+
+            e.printStackTrace();
+            return false;
+
         } finally {
             em.close();
         }
@@ -329,4 +392,6 @@ public class ControladorCurso implements IControladorCurso {
         }
     }
 }
+
+
 

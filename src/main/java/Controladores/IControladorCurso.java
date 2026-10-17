@@ -35,6 +35,8 @@ public interface IControladorCurso {
 
     boolean inscribirEstudiante(InscripcionCurso inscripcion);
     
+    boolean cambiarEstadoInscripcion(Long idInscripcion, Logica.EstadoInscripcion estado);
+    
     boolean altaCategoria(Categoria categoria);
     
     Categoria buscarCategoria(String nombre);

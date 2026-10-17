@@ -11,6 +11,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.io.Serializable;
 import java.time.LocalDate;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.PrePersist;
 
 @Entity
 public class InscripcionCurso implements Serializable {
@@ -28,6 +31,9 @@ public class InscripcionCurso implements Serializable {
 
     @ManyToOne
     private EdicionCurso edicionCurso;
+    
+    @Enumerated(EnumType.STRING)
+    private EstadoInscripcion estado = EstadoInscripcion.INSCRIPTO;
 
     public InscripcionCurso() {
     }
@@ -39,6 +45,14 @@ public class InscripcionCurso implements Serializable {
         this.estudiante = estudiante;
         this.fechaInscripcion = fechaInscripcion;
         this.edicionCurso = curso;
+        this.estado = EstadoInscripcion.INSCRIPTO;
+    }
+    
+    @PrePersist
+    private void asignarEstadoInicial() {
+        if (estado == null) {
+            estado = EstadoInscripcion.INSCRIPTO;
+        }
     }
 
     public Long getId() {
@@ -82,4 +96,14 @@ public class InscripcionCurso implements Serializable {
             curso.getInscriptos().add(this);
         }
     }
+    
+    public EstadoInscripcion getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoInscripcion estado) {
+        this.estado = estado;
+    }
 }
+
+
