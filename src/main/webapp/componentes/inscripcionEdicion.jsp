@@ -1,9 +1,10 @@
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Inscripcion Programa - edExt</title>
+    <title>Inscripcion Edicion - edExt</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"rel="stylesheet">
     <link rel="stylesheet"href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
@@ -40,18 +41,23 @@
                     <label for="tipo" class="form-label fw-semibold">Cursos de: </label>
                     <select id="tipo" onchange="mostrarLista()" class="form-select">
                         <option value="">Seleccione</option>
-                        <option value="instituto">Institutos</option>
+                        <option value="instituto" ${not empty param.instituto ? 'selected' : ''}>Institutos</option>
                         <option value="categoria">Categorias</option>
                     </select>
                     <hr>
 
                     <div id="lista-institutos" style="display: none;">
-                        <label for="instituto" class="form-label fw-semibold">Institutos </label>
-                        <select id="instituto" onchange="" class="form-select">
-                            <option value="">Seleccione</option>
-                            <option value="1">Instituto 1</option>
-                            <option value="2">Instituto 2</option>
-                        </select>
+                        <form action="${pageContext.request.contextPath}/inscripcionEdicion" method="GET">
+                            <label for="instituto" class="form-label">Instituto</label>
+                            <select id="instituto" name="instituto" class="form-select" onchange="this.form.submit()">
+                                <option value="">Seleccione un instituto</option>
+                                <c:forEach var="i" items="${institutos}">
+                                    <option value="${i.key}" ${param.instituto == i.key ? 'selected' : ''}>
+                                        <c:out value="${i.key}"/>
+                                    </option>
+                                </c:forEach>
+                            </select>
+                        </form>
                     </div>
                     <div id="lista-categorias" style="display: none;">
                         <label for="categoria" class="form-label fw-semibold">Categorias: </label>
@@ -63,74 +69,40 @@
                     </div>
                 </div>
             </div>
-            
             <section class="mb-4">
                 <h3 class="h4 mb-3">
                     <i class="bi bi-journal-bookmark me-2"></i>
                     Cursos
                 </h3>
-                <div class="cursos-scroll g-3">
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card h-100 shadow-sm">
-                            <img src="https://placehold.co/600x300/e2e8f0/334155?text=Curso1"
-                                 class="curso-img card-img-top"
-                                 alt="Imagen del curso HTML y CSS">
-                            <div class="card-body">
-                                <h4 class="h5 card-title">1</h4>
-                                <p class="card-text text-secondary">
-                                    Es el primer curso.
-                                </p>
-                                <a href="#"class="btn btn-outline-primary btn-sm">Inscribirse<i class="bi bi-arrow-right ms-1"></i></a>
-                                <a href="consultarPrograma.jsp"class="btn btn-outline-primary btn-sm">Información<i class="bi bi-arrow-right ms-1"></i></a>
-                            </div>
+                <c:choose>
+                    <c:when test="${empty institutoSeleccionado}">
+                        <p class="text-secondary">Seleccioná un instituto para ver sus cursos.</p>
+                    </c:when>
+                    <%-- El instituto no tiene cursos --%>
+                    <c:when test="${empty institutoSeleccionado.cursos}">
+                        <p class="text-secondary">Este instituto todavía no tiene cursos registrados.</p>
+                    </c:when>
+                    <%-- Mostrar los cursos del instituto seleccionado --%>
+                    <c:otherwise>
+                        <div class="cursos-scroll g-3">
+                            <c:forEach var="curso" items="${institutoSeleccionado.cursos}">
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-body">
+                                            <h4 class="h5 card-title"><c:out value="${curso.nombre}"/></h4>
+                                            <p class="card-text text-secondary"><c:out value="${curso.descripcion}"/></p>
+                                            <p class="small text-secondary">Duración: <c:out value="${curso.duracion}"/></p>
+                                            <a href="#" class="btn btn-outline-primary btn-sm">
+                                                Inscribirse
+                                                <i class="bi bi-arrow-right ms-1"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
                         </div>
-                    </div>
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card h-100 shadow-sm">
-                            <img src="https://placehold.co/600x300/e2e8f0/334155?text=Curso2"
-                                 class="curso-img card-img-top"
-                                 alt="Imagen del curso JavaScript">
-                            <div class="card-body">
-                                <h4 class="h5 card-title">2</h4>
-                                <p class="card-text text-secondary">
-                                    Es el segundo curso.
-                                </p>
-                                <a href="#"class="btn btn-outline-primary btn-sm">Inscribirse<i class="bi bi-arrow-right ms-1"></i></a>
-                                <a href="consultarPrograma.jsp"class="btn btn-outline-primary btn-sm">Información<i class="bi bi-arrow-right ms-1"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card h-100 shadow-sm">
-                            <img src="https://placehold.co/600x300/e2e8f0/334155?text=Curso3"
-                                 class="curso-img card-img-top"
-                                 alt="Imagen del curso Java Web">
-                            <div class="card-body">
-                                <h4 class="h5 card-title">3</h4>
-                                <p class="card-text text-secondary">
-                                    Es el tercer curso.
-                                </p>
-                                <a href="#"class="btn btn-outline-primary btn-sm">Inscribirse<i class="bi bi-arrow-right ms-1"></i></a>
-                                <a href="consultarPrograma.jsp"class="btn btn-outline-primary btn-sm">Información<i class="bi bi-arrow-right ms-1"></i></a>
-                            </div>
-                        </div>
-                    </div>   
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card h-100 shadow-sm">
-                            <img src="https://placehold.co/600x300/e2e8f0/334155?text=Curso4"
-                                 class="curso-img card-img-top"
-                                 alt="Imagen del curso Java Web">
-                            <div class="card-body">
-                                <h4 class="h5 card-title">4</h4>
-                                <p class="card-text text-secondary">
-                                    Es el cuarto curso.
-                                </p>
-                                <a href="#"class="btn btn-outline-primary btn-sm">Inscribirse<i class="bi bi-arrow-right ms-1"></i></a>
-                                <a href="consultarPrograma.jsp"class="btn btn-outline-primary btn-sm">Información<i class="bi bi-arrow-right ms-1"></i></a>
-                            </div>
-                        </div>
-                    </div> 
-                </div>
+                    </c:otherwise>
+                </c:choose>
             </section>
         </main>
     </div>
@@ -147,6 +119,7 @@
                 document.getElementById("lista-categorias").style.display = "block";
             }
         }
+        document.addEventListener("DOMContentLoaded", mostrarLista);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>

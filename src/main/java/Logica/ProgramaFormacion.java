@@ -22,6 +22,7 @@ public class ProgramaFormacion implements Serializable {
     private String nombre;
 
     private String descripcion;
+    private String imagen;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private LocalDate fechaAlta;
@@ -34,12 +35,23 @@ public class ProgramaFormacion implements Serializable {
 
     public ProgramaFormacion() {
     }
-
+    
     public ProgramaFormacion(String nombre, String descripcion,
+        LocalDate fechaInicio, LocalDate fechaFin) {
+
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+        this.fechaAlta = LocalDate.now();
+    }
+
+    public ProgramaFormacion(String nombre, String descripcion, String imagen,
             LocalDate fechaInicio, LocalDate fechaFin) {
 
         this.nombre = nombre;
         this.descripcion = descripcion;
+        this.imagen = imagen;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.fechaAlta = LocalDate.now();
@@ -59,6 +71,13 @@ public class ProgramaFormacion implements Serializable {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+    
+    public String getImagen() {
+        return imagen;
+    }
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 
     public LocalDate getFechaInicio() {

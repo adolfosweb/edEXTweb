@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -26,16 +27,21 @@
                     <!-- Selección -->
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <form action="/agregarCursoAPrograma" method="POST">
+                            <form action="${pageContext.request.contextPath}/agregarCursoAPrograma" method="POST">
+                                <!-- Mensaje de error -->
+                                <c:if test="${not empty error}">
+                                    <div class="alert alert-danger" role="alert">
+                                        <c:out value="${error}"/>
+                                    </div>
+                                </c:if>
                                 <!-- Programa -->
                                 <div class="mb-4">
                                     <label for="programa" class="form-label fw-semibold">Programa de formación</label>
                                     <select id="programa"name="programa"class="form-select"required>
                                         <option value="" selected disabled>Seleccione un programa</option>
-                                        <option value="1">Prueba1</option>
-                                        <option value="2">Prueba2</option>
-                                        <option value="3">Prueba3</option>
-                                        <option value="4">Prueba4</option>
+                                        <c:forEach var="p" items="${programas}">
+                                            <option value="<c:out value='${p.key}'/>"><c:out value="${p.key}"/></option>
+                                        </c:forEach>
                                     </select>
                                 </div>
                                 <!-- Curso -->
@@ -43,10 +49,11 @@
                                     <label for="curso" class="form-label fw-semibold">Curso</label>
                                     <select id="curso"name="curso"class="form-select"required>
                                         <option value="" selected disabled>Seleccione un curso</option>
-                                        <option value="1">CPrueba1</option>
-                                        <option value="2">CPrueba2</option>
-                                        <option value="3">CPrueba3</option>
-                                        <option value="4">CPrueba4</option>
+                                        <c:forEach var="c" items="${cursos}">
+                                            <option value="<c:out value='${c.key}'/>">
+                                                <c:out value="${c.key}"/>
+                                            </option>
+                                        </c:forEach>
                                     </select>
                                 </div>
                                 <hr class="my-4">

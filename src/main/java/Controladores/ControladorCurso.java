@@ -5,6 +5,7 @@ import Logica.Instituto;
 import Logica.EdicionCurso;
 import Logica.InscripcionCurso;
 import Logica.Estudiante;
+import Logica.Categoria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import java.util.HashMap;
@@ -284,6 +285,45 @@ public class ControladorCurso implements IControladorCurso {
             }
             e.printStackTrace();
             return false;
+        } finally {
+            em.close();
+        }
+    }
+    
+    @Override
+    public boolean altaCategoria(Categoria categoria){
+        if (categoria == null || buscarCategoria(categoria.getNombre()) != null) {
+            return false;
+        }
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+            em.persist(categoria);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+    
+    @Override
+    public Categoria buscarCategoria(String nombre){
+        if (nombre == null || nombre.trim().isEmpty()) {
+            return null;
+        }
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        try {
+            return em.find(Categoria.class, nombre);
         } finally {
             em.close();
         }
