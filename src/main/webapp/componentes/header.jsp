@@ -14,10 +14,15 @@
         </a>
 
         <!-- Buscador -->
-        <form class="d-flex flex-grow-1 mx-lg-4 my-3 my-lg-0"style="max-width: 450px;"role="search"action="#"method="get">
-            <input class="form-control me-2"type="search"name="busqueda"
-                   placeholder="Buscar cursos y programas..."aria-label="Buscar cursos y programas">
-            <button class="btn btn-outline-light" type="submit">
+        <form class="d-flex flex-grow-1 mx-lg-4 my-3 my-lg-0" style="max-width: 450px;"
+              role="search" action="${pageContext.request.contextPath}/buscador" method="get">
+            <input class="form-control me-2" type="search" name="q"
+                   placeholder="Buscar cursos, programas o usuarios..."
+                   aria-label="Buscar cursos, programas o usuarios...">
+            <!-- Valores iniciales de la búsqueda -->
+            <input type="hidden" name="filtro" value="todos">
+            <input type="hidden" name="orden" value="nombre_asc">
+            <button class="btn btn-outline-light" type="submit" aria-label="Buscar">
                 <i class="bi bi-search"></i>
             </button>
         </form>
