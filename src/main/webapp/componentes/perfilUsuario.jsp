@@ -88,8 +88,8 @@
 
     <title>Perfil de Usuario - edExt</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"rel="stylesheet">
+    <link rel="stylesheet"href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <style>
         .perfil-contenedor {
@@ -439,6 +439,52 @@
                                class="btn btn-outline-primary mt-2">
                                 Modificar datos
                             </a>
+
+                        <% } %>
+                        
+                        <%
+                            Object usuarioSesionAtributo =
+                                    session.getAttribute("usuario");
+
+                            boolean haySesion =
+                                    usuarioSesionAtributo instanceof Usuario;
+                        %>
+
+                        <% if (!esPropioPerfil && haySesion) { %>
+
+                            <form action="<%= request.getContextPath() %>/SeguirUsuarioServlet"
+                                  method="post"
+                                  class="mt-2">
+
+                                <input type="hidden"
+                                       name="nickname"
+                                       value="<%= nickname %>">
+
+                                <% if (Boolean.TRUE.equals(request.getAttribute("siguiendo"))) { %>
+
+                                    <input type="hidden"
+                                           name="accion"
+                                           value="dejarDeSeguir">
+
+                                    <button type="submit"
+                                            class="btn btn-outline-secondary">
+                                        Dejar de seguir
+                                    </button>
+
+                                <% } else { %>
+
+                                    <input type="hidden"
+                                           name="accion"
+                                           value="seguir">
+
+                                    <button type="submit"
+                                            class="btn btn-primary">
+                                        Seguir
+                                    </button>
+
+                                <% } %>
+
+                            </form>
 
                         <% } %>
                     </div>
