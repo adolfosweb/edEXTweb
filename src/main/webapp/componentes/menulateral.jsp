@@ -29,7 +29,11 @@
     <div>
         <h6 class="text-uppercase text-secondary fw-bold text-white">Pruebas</h6>
         <ul class="list-unstyled">
-            <li class="mb-1"><a href="crearPrograma.jsp" class="text-decoration-none text-white">Crear Programa</a></li>
+            <li class="mb-1"><a href="${pageContext.request.contextPath}/crearPrograma" class="text-decoration-none text-white">Crear Programa</a></li>
+            <li class="mb-1"><a href="${pageContext.request.contextPath}/agregarCursoAPrograma" class="text-decoration-none text-white">AgCuAPro</a></li>
+            <li class="mb-1"><a href="${pageContext.request.contextPath}/consultarPrograma" class="text-decoration-none text-white">Consultar Programa</a></li>
+            <li class="mb-1"><a href="${pageContext.request.contextPath}/inscripcionPrograma" class="text-decoration-none text-white">Inscribirse a Programa</a></li>
+            <li class="mb-1"><a href="${pageContext.request.contextPath}/inscripcionEdicion" class="text-decoration-none text-white">Inscribirse a Curso</a></li>
         </ul>
     </div>
 </aside>
