@@ -126,7 +126,10 @@
                                     <p class="card-text text-secondary">
                                         <c:out value ="${c.descripcion}"/>
                                     </p>
-                                    <a href="#"class="btn btn-outline-primary btn-sm">Consultar curso<i class="bi bi-arrow-right ms-1"></i></a>
+                                    <c:url var="urlCurso" value="/SvltConsultarCurso">
+                                        <c:param name="nombre" value="${c.nombre}"/>
+                                    </c:url>
+                                    <a href="${urlCurso}" class="btn btn-outline-primary btn-sm">Consultar curso<i class="bi bi-arrow-right ms-1"></i></a>
                                 </div>
                             </div>
                         </div>

@@ -30,6 +30,39 @@
             font-weight: 600;
             text-transform: capitalize;
         }
+        .resultado-imagen {
+            height: 180px;
+            overflow: hidden;
+            background-color: #f1f3f5;
+        }
+        .resultado-imagen img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .placeholder-imagen {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #6c757d;
+        }
+        .placeholder-imagen i {
+            font-size: 2.5rem;
+        }
+        .placeholder-imagen span {
+            font-size: 0.875rem;
+        }
+        .placeholder-curso {
+            background-color: #eaf2ff;
+            color: #0d6efd;
+        }
+        .placeholder-generico {
+            background-color: #f1f3f5;
+        }
     </style>
 </head>
 <body>
@@ -112,8 +145,43 @@
                 <c:when test="${not empty resultados}">
                     <div class="row g-4">
                         <c:forEach var="r" items="${resultados}">
-                            <div class="col-12 col-md-6 col-xl-4">
-                                <article class="card resultado-card shadow-sm">
+                            <div class="col-12 col-md-6 col-xl-4">                              
+                                <article class="card resultado-card shadow-sm h-100">
+                                    <%-- Imagen o placeholder según el tipo de resultado --%>
+                                    <div class="resultado-imagen">
+                                        <c:choose>
+                                            <%-- Cursos: placeholder temporal --%>
+                                            <c:when test="${r.tipo == 'curso'}">
+                                                <div class="placeholder-imagen placeholder-curso">
+                                                    <i class="bi bi-journal-bookmark"></i>
+                                                    <span>Imagen del curso</span>
+                                                </div>
+                                            </c:when>
+                                            <%-- Programas: mostrar su imagen si existe --%>
+                                            <c:when test="${r.tipo == 'programa' and not empty r.imagen}">
+                                                <img src="<c:out value='${r.imagen}'/>"
+                                                     alt="Imagen de <c:out value='${r.nombre}'/>"
+                                                     class="img-fluid"
+                                                     loading="lazy">
+                                            </c:when>
+                                            <%-- Usuarios: avatar provisional --%>
+                                            <c:when test="${r.tipo == 'usuario' and not empty r.imagen}">
+                                                <img src="<c:out value='${r.imagen}'/>"
+                                                     alt="Imagen de perfil de <c:out value='${r.nombre}'/>"
+                                                     class="img-fluid"
+                                                     loading="lazy">
+                                            </c:when>
+                                            <%-- Fallback para programas y usuarios sin imagen --%>
+                                            <c:otherwise>
+                                                <div class="placeholder-imagen placeholder-generico">
+                                                    <i class="${r.tipo == 'usuario' ? 'bi bi-person-circle' : 'bi bi-image'}"></i>
+                                                    <span>
+                                                        ${r.tipo == 'usuario' ? 'Sin foto de perfil' : 'Sin imagen disponible'}
+                                                    </span>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
                                     <div class="card-body d-flex flex-column">
                                         <div class="mb-3">
                                             <c:choose>
@@ -173,10 +241,18 @@
                                                         <i class="bi bi-arrow-right ms-1"></i>
                                                     </a>
                                                 </c:when>
+                                                <c:when test="${r.tipo == 'curso'}">
+                                                    <c:url var="urlCurso" value="/SvltConsultarCurso">
+                                                        <c:param name="nombre" value="${r.id}"/>
+                                                    </c:url>
+                                                    <a class="btn btn-outline-primary btn-sm" href="${urlCurso}">
+                                                        Consultar curso
+                                                        <i class="bi bi-arrow-right ms-1"></i>
+                                                    </a>
+                                                </c:when>
                                                 <c:otherwise>
                                                     <button type="button"
-                                                            class="btn btn-outline-secondary btn-sm"
-                                                            disabled>
+                                                            class="btn btn-outline-secondary btn-sm" disabled>
                                                         Más información
                                                         <i class="bi bi-arrow-right ms-1"></i>
                                                     </button>

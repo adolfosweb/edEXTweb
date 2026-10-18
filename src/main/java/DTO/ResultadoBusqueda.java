@@ -9,8 +9,9 @@ public class ResultadoBusqueda {
     private String nombre;
     private String descripcion;
     private LocalDate fecha;
+    private String imagen;
 
-    public ResultadoBusqueda(String tipo, String id, String nombre, String descripcion, LocalDate fecha) {
+    public ResultadoBusqueda(String tipo, String id, String nombre, String descripcion, LocalDate fecha, String imagen) {
         this.tipo = tipo;
         this.id = id;
         this.nombre = nombre;
@@ -37,5 +38,8 @@ public class ResultadoBusqueda {
     public LocalDate getFecha() {
         return fecha;
     }
-}
 
+    public String getImagen() {
+        return imagen;
+    }
+}

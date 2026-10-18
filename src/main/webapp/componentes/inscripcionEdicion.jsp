@@ -35,6 +35,18 @@
         <jsp:include page="menulateral.jsp" />
         <main class="container-fluid py-4 px-4 bg-light">
             <h2 class="mb-4 text-dark">Inscribirse a un curso</h2>
+            <c:if test="${not empty mensaje}">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <c:out value="${mensaje}"/>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            </c:if>
+            <c:if test="${not empty error}">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <c:out value="${error}"/>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            </c:if>
             <!-- 1. Seleccionar programa -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
@@ -92,10 +104,36 @@
                                             <h4 class="h5 card-title"><c:out value="${curso.nombre}"/></h4>
                                             <p class="card-text text-secondary"><c:out value="${curso.descripcion}"/></p>
                                             <p class="small text-secondary">Duración: <c:out value="${curso.duracion}"/></p>
-                                            <a href="#" class="btn btn-outline-primary btn-sm">
-                                                Inscribirse
-                                                <i class="bi bi-arrow-right ms-1"></i>
-                                            </a>
+                                            <div class="mt-3">
+                                                <h5 class="h6">Ediciones disponibles</h5>
+                                                <c:choose>
+                                                    <c:when test="${empty edicionesPorCurso[curso.nombre]}">
+                                                        <p class="small text-secondary">Este curso no tiene ediciones registradas.</p>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <c:forEach var="edicion" items="${edicionesPorCurso[curso.nombre]}">
+                                                            <div class="border rounded p-2 mb-2">
+                                                                <div class="fw-semibold">
+                                                                    <c:out value="${edicion.nombre}"/>
+                                                                </div>
+                                                                <div class="small text-secondary mb-2">
+                                                                    Inicio: <c:out value="${edicion.fechaInicio}"/><br>
+                                                                    Fin: <c:out value="${edicion.fechaFin}"/><br>
+                                                                    Cupo: <c:out value="${edicion.cupo}"/>
+                                                                </div>
+                                                                <form action="${pageContext.request.contextPath}/inscripcionEdicion" method="POST">
+                                                                    <input type="hidden" name="instituto" value="${institutoSeleccionado.nombre}">
+                                                                    <input type="hidden" name="edicion" value="${edicion.nombre}">
+                                                                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                                        Inscribirse
+                                                                        <i class="bi bi-arrow-right ms-1"></i>
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </c:forEach>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

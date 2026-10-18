@@ -1,6 +1,8 @@
+
 package com.mycompany.edextweb;
 
 import Controladores.ControladorUsuario;
+import Controladores.ControladorSeguimiento;
 import Logica.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,10 +17,12 @@ import java.io.IOException;
 public class PerfilUsuarioServlet extends HttpServlet {
 
     private ControladorUsuario controladorUsuario;
+    private ControladorSeguimiento controladorSeguimiento;
 
     @Override
     public void init() throws ServletException {
         controladorUsuario = new ControladorUsuario();
+        controladorSeguimiento = new ControladorSeguimiento();
     }
 
     @Override
@@ -46,24 +50,38 @@ public class PerfilUsuarioServlet extends HttpServlet {
             return;
         }
 
-        // Guardar el usuario que se está consultando
         request.setAttribute("usuario", usuario);
 
-        // Comprobar si el usuario está viendo su propio perfil
         HttpSession session = request.getSession(false);
         boolean esPropioPerfil = false;
+        boolean siguiendo = false;
+
+        Usuario usuarioSesion = null;
 
         if (session != null) {
-            Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
+            Object atributoUsuario = session.getAttribute("usuario");
 
-            if (usuarioSesion != null
-                    && usuarioSesion.getNickname() != null) {
-                esPropioPerfil = usuarioSesion.getNickname()
-                        .equals(usuario.getNickname());
+            if (atributoUsuario instanceof Usuario) {
+                usuarioSesion = (Usuario) atributoUsuario;
+            }
+        }
+
+        if (usuarioSesion != null
+                && usuarioSesion.getNickname() != null) {
+
+            esPropioPerfil = usuarioSesion.getNickname()
+                    .equals(usuario.getNickname());
+
+            if (!esPropioPerfil) {
+                siguiendo = controladorSeguimiento.estaSiguiendo(
+                    usuarioSesion.getNickname(),
+                    usuario.getNickname()
+                );
             }
         }
 
         request.setAttribute("esPropioPerfil", esPropioPerfil);
+        request.setAttribute("siguiendo", siguiendo);
 
         request.getRequestDispatcher(
                 "/componentes/perfilUsuario.jsp"

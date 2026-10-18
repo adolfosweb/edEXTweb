@@ -2,6 +2,11 @@
 <persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence     https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
   <persistence-unit name="my_persistence_unit">
     <class>Logica.Categoria</class>
+    <class>Logica.Usuario</class>
+    <class>Logica.Estudiante</class>
+    <class>Logica.Docente</class>
+    <class>Logica.Seguimiento</class>
+    <class>Logica.TokenRecordarme</class>
     <properties>
       <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
       <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://adolfosweb.uy:3306/adolfosweb_edext?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC"/>

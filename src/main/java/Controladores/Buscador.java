@@ -51,7 +51,8 @@ public class Buscador {
                         curso.getNombre(),
                         curso.getNombre(),
                         curso.getDescripcion(),
-                        convertirFecha(curso.getFecRegistro())
+                        convertirFecha(curso.getFecRegistro()),
+                        null
                     ));
                 }
             }
@@ -75,7 +76,8 @@ public class Buscador {
                         programa.getNombre(),
                         programa.getNombre(),
                         programa.getDescripcion(),
-                        programa.getFechaAlta()
+                        programa.getFechaAlta(),
+                        programa.getImagen()
                     ));
                 }
             }
@@ -98,6 +100,7 @@ public class Buscador {
                         "usuario",
                         usuario.getNickname(),
                         nombreVisible,
+                        null,
                         null,
                         null
                     ));
