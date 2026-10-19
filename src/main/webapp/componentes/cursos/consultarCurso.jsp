@@ -118,22 +118,26 @@
             </section>
             <section class="mt-5">
                 <h2>Programas de formación asociados</h2>
-                <% List<DtProgramaFormacion> programas = curso.getProgramas();
-                   if (programas == null || programas.isEmpty()) { %>
+                <%
+                  List<DtProgramaFormacion> programas = curso.getProgramas();
+                  if (programas == null || programas.isEmpty()) {
+                %>
                     <p>Este curso no está asociado a programas de formación.</p>
-                <% } else { %>
-                    <ul class="list-group">
-                        <% for (DtProgramaFormacion programa : programas) { %>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span><strong><%= escapeHtml(programa.getNombre()) %></strong></span>
-                                <a class="btn btn-outline-primary btn-sm"
-                                   href="<%= urlCurso %>&amp;programa=<%= URLEncoder.encode(programa.getNombre(), "UTF-8") %>">
-                                    Ver información
-                                </a>
-                            </li>
-                        <% } %>
-                    </ul>
-                <% } %>
+                    <% } else { %>
+                        <ul class="list-group">
+                            <% for (DtProgramaFormacion programa : programas) { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <strong><%= escapeHtml(programa.getNombre()) %></strong>
+                                    </span>
+                                    <a class="btn btn-outline-primary btn-sm"
+                                       href="<%= request.getContextPath() %>/consultarPrograma?programa=<%= URLEncoder.encode(programa.getNombre(), "UTF-8") %>">
+                                        Ver información
+                                    </a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    <% } %>
             </section>
             <% if (edicionSeleccionada != null) { %>
                 <section class="card mt-5">

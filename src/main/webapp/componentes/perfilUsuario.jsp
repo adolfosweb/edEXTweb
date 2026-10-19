@@ -353,7 +353,7 @@
                 <% } %>
 
                 <!-- Volver a la lista de usuarios -->
-                <a href="<%= request.getContextPath() %>/buscador"
+                <a href="javascript:history.back()"
                    class="perfil-volver"
                    title="Volver a la lista de usuarios"
                    aria-label="Volver a la lista de usuarios">

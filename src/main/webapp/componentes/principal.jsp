@@ -31,7 +31,6 @@
         <jsp:include page="menulateral.jsp" />
         <main class="container bg-light">
             <h1>Bienvenido a edExt</h1>
-            <p class="text-dark">Pagina de prueba.</p>
         </main>
     </div>
     <!-- JavaScript de Bootstrap -->
