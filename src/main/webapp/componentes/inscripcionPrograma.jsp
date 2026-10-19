@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -34,6 +35,16 @@
         <jsp:include page="menulateral.jsp" />
         <main class="container-fluid py-4 px-4 bg-light">
             <h2 class="mb-4 text-dark">Inscribirse a un programa de formación</h2>
+            <c:if test="${not empty mensaje}">
+                <div class="alert alert-success" role="alert">
+                    <c:out value="${mensaje}"/>
+                </div>
+            </c:if>
+            <c:if test="${not empty error}">
+                <div class="alert alert-danger" role="alert">
+                    <c:out value="${error}"/>
+                </div>
+            </c:if>
             <!-- 1. Seleccionar programa -->
             <section class="mb-4">
                 <h3 class="h4 mb-3">
@@ -41,66 +52,39 @@
                     Programas
                 </h3>
                 <div class="cursos-scroll g-3">
+                    <c:forEach var="p" items="${programas}">
                     <div class="col-md-6 col-xl-4">
                         <div class="card h-100 shadow-sm">
-                            <img src="https://placehold.co/600x300/e2e8f0/334155?text=Programa1"
-                                 class="curso-img card-img-top"
-                                 alt="Imagen del curso HTML y CSS">
+                            <c:choose>
+                                    <c:when test="${not empty p.value.imagen}">
+                                        <img src="${pageContext.request.contextPath}${p.value.imagen}"
+                                             class="card-img-top"
+                                             alt="Portada del programa"
+                                             style="height: 200px; object-fit: cover;">
+                                    </c:when>
+
+                                    <c:otherwise>
+                                        <img src="https://placehold.co/600x300/e2e8f0/334155?text=Programa"
+                                             class="card-img-top"
+                                             alt="Programa sin imagen">
+                                    </c:otherwise>
+                                </c:choose>
                             <div class="card-body">
-                                <h4 class="h5 card-title">1</h4>
-                                <p class="card-text text-secondary">
-                                    Es el primer programa.
-                                </p>
-                                <a href="#"class="btn btn-outline-primary btn-sm">Inscribirse<i class="bi bi-arrow-right ms-1"></i></a>
-                                <a href="consultarPrograma.jsp"class="btn btn-outline-primary btn-sm">Información<i class="bi bi-arrow-right ms-1"></i></a>
+                                <h4 class="h5 card-title"><c:out value="${p.value.nombre}"/></h4>
+                                <p class="card-text text-secondary"><c:out value="${p.value.descripcion}"/></p>
+                                <form action="${pageContext.request.contextPath}/inscripcionPrograma" method="post">
+                                    <input type="hidden" name="programa" value="${p.key}">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                                        Inscribirse
+                                        <i class="bi bi-arrow-right ms-1"></i>
+                                    </button>
+                                </form>                                
+                                <a href="${pageContext.request.contextPath}/consultarPrograma?programa=${p.key}"
+                                    class="btn btn-outline-primary btn-sm">Información<i class="bi bi-arrow-right ms-1"></i></a>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card h-100 shadow-sm">
-                            <img src="https://placehold.co/600x300/e2e8f0/334155?text=Programa2"
-                                 class="curso-img card-img-top"
-                                 alt="Imagen del curso JavaScript">
-                            <div class="card-body">
-                                <h4 class="h5 card-title">2</h4>
-                                <p class="card-text text-secondary">
-                                    Es el segundo programa.
-                                </p>
-                                <a href="#"class="btn btn-outline-primary btn-sm">Inscribirse<i class="bi bi-arrow-right ms-1"></i></a>
-                                <a href="consultarPrograma.jsp"class="btn btn-outline-primary btn-sm">Información<i class="bi bi-arrow-right ms-1"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card h-100 shadow-sm">
-                            <img src="https://placehold.co/600x300/e2e8f0/334155?text=Programa3"
-                                 class="curso-img card-img-top"
-                                 alt="Imagen del curso Java Web">
-                            <div class="card-body">
-                                <h4 class="h5 card-title">3</h4>
-                                <p class="card-text text-secondary">
-                                    Es el tercer programa.
-                                </p>
-                                <a href="#"class="btn btn-outline-primary btn-sm">Inscribirse<i class="bi bi-arrow-right ms-1"></i></a>
-                                <a href="consultarPrograma.jsp"class="btn btn-outline-primary btn-sm">Información<i class="bi bi-arrow-right ms-1"></i></a>
-                            </div>
-                        </div>
-                    </div>   
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card h-100 shadow-sm">
-                            <img src="https://placehold.co/600x300/e2e8f0/334155?text=Programa4"
-                                 class="curso-img card-img-top"
-                                 alt="Imagen del curso Java Web">
-                            <div class="card-body">
-                                <h4 class="h5 card-title">4</h4>
-                                <p class="card-text text-secondary">
-                                    Es el cuarto programa.
-                                </p>
-                                <a href="#"class="btn btn-outline-primary btn-sm">Inscribirse<i class="bi bi-arrow-right ms-1"></i></a>
-                                <a href="consultarPrograma.jsp"class="btn btn-outline-primary btn-sm">Información<i class="bi bi-arrow-right ms-1"></i></a>
-                            </div>
-                        </div>
-                    </div> 
+                    </c:forEach>  
                 </div>
             </section>
         </main>

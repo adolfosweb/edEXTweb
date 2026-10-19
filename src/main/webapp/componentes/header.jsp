@@ -7,15 +7,22 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
     <div class="container-fluid px-4">
         <!-- Nombre de la plataforma -->
-        <a class="navbar-brand fw-bold" href="principal.jsp">
+        <a class="navbar-brand fw-bold"
+           href="${pageContext.request.contextPath}/componentes/principal.jsp">
             <i class="bi bi-mortarboard-fill me-2"></i>
             edExt
         </a>
+
         <!-- Buscador -->
-        <form class="d-flex flex-grow-1 mx-lg-4 my-3 my-lg-0"style="max-width: 450px;"role="search"action="#"method="get">
-            <input class="form-control me-2"type="search"name="busqueda"
-                   placeholder="Buscar cursos y programas..."aria-label="Buscar cursos y programas">
-            <button class="btn btn-outline-light" type="submit">
+        <form class="d-flex flex-grow-1 mx-lg-4 my-3 my-lg-0" style="max-width: 450px;"
+              role="search" action="${pageContext.request.contextPath}/buscador" method="get">
+            <input class="form-control me-2" type="search" name="q"
+                   placeholder="Buscar cursos, programas o usuarios..."
+                   aria-label="Buscar cursos, programas o usuarios...">
+            <!-- Valores iniciales de la búsqueda -->
+            <input type="hidden" name="filtro" value="todos">
+            <input type="hidden" name="orden" value="nombre_asc">
+            <button class="btn btn-outline-light" type="submit" aria-label="Buscar">
                 <i class="bi bi-search"></i>
             </button>
         </form>
@@ -28,9 +35,10 @@
 
             <% if (usuario != null) { %>
 
-                <span class="text-white">
-                    <%= usuario.getNickname() %>
-                </span>
+                <a href="<%= request.getContextPath() %>/PerfilUsuarioServlet?nickname=<%= java.net.URLEncoder.encode(usuario.getNickname(), "UTF-8") %>"
+                    class="btn btn-outline-light btn-sm">
+                     <%= usuario.getNickname() %>
+                </a>
 
                 <div class="vr border border-light border-1 opacity-100"></div>
 

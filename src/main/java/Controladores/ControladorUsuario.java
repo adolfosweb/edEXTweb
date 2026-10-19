@@ -275,4 +275,28 @@ public boolean altaUsuario(Usuario usuario, String nombreInstituto) {
             em.close();
         }
     }
+    
+    
+    public boolean correoUsadoPorOtroUsuario(String correo, String nickname) {
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+
+        try {
+            Long cantidad = em.createQuery(
+                    "SELECT COUNT(u) FROM Usuario u "
+                    + "WHERE u.correoElectronico = :correo "
+                    + "AND u.nickname <> :nickname",
+                    Long.class
+            )
+            .setParameter("correo", correo)
+            .setParameter("nickname", nickname)
+            .getSingleResult();
+
+            return cantidad > 0;
+
+        } finally {
+            em.close();
+        }
+    }
+
 }

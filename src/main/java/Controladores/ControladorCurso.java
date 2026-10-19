@@ -5,6 +5,7 @@ import Logica.Instituto;
 import Logica.EdicionCurso;
 import Logica.InscripcionCurso;
 import Logica.Estudiante;
+import Logica.Categoria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import java.util.HashMap;
@@ -246,7 +247,9 @@ public class ControladorCurso implements IControladorCurso {
 
     @Override
     public boolean inscribirEstudiante(InscripcionCurso inscripcion) {
-        if (inscripcion == null || inscripcion.getEstudiante() == null || inscripcion.getCurso() == null) {
+        if (inscripcion == null
+                || inscripcion.getEstudiante() == null
+                || inscripcion.getCurso() == null) {
             return false;
         }
 
@@ -256,28 +259,114 @@ public class ControladorCurso implements IControladorCurso {
         try {
             tx.begin();
 
-            // 1. Re-asociar las entidades
-            Estudiante est = em.find(Estudiante.class, inscripcion.getEstudiante().getNickname());
-            EdicionCurso ed = em.find(EdicionCurso.class, inscripcion.getCurso().getNombre());
+            Estudiante est = em.find(
+                    Estudiante.class,
+                    inscripcion.getEstudiante().getNickname()
+            );
+
+            EdicionCurso ed = em.find(
+                    EdicionCurso.class,
+                    inscripcion.getCurso().getNombre()
+            );
 
             if (est == null || ed == null) {
+                tx.rollback();
+                return false;
+            }
+            InscripcionCurso existente = buscarInscripcion(
+                    est.getNickname(),
+                    ed.getNombre()
+            );
+
+            if (existente != null) {
+                tx.rollback();
                 return false;
             }
 
-            // 2. Validar que la edición tenga cupo disponible (si tiene cupo asignado > 0)
-            if (ed.getCupo() > 0 && ed.getInscriptos().size() >= ed.getCupo()) {
+
+            if (ed.getCupo() > 0
+                    && ed.getInscriptos().size() >= ed.getCupo()) {
                 tx.rollback();
-                return false; // Cupo agotado
+                return false;
             }
 
             inscripcion.setEstudiante(est);
             inscripcion.setCurso(ed);
+            if (inscripcion.getEstado() == null) {
+                inscripcion.setEstado(Logica.EstadoInscripcion.INSCRIPTO);
+            }
 
             em.persist(inscripcion);
 
             tx.commit();
             return true;
 
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+
+            e.printStackTrace();
+            return false;
+
+        } finally {
+            em.close();
+        }
+      }
+    
+    @Override
+    public boolean cambiarEstadoInscripcion(Long idInscripcion, Logica.EstadoInscripcion estado) {
+
+        if (idInscripcion == null || estado == null) {
+            return false;
+        }
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            InscripcionCurso inscripcion =
+                    em.find(InscripcionCurso.class, idInscripcion);
+
+            if (inscripcion == null) {
+                tx.rollback();
+                return false;
+            }
+
+            inscripcion.setEstado(estado);
+
+            tx.commit();
+            return true;
+
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+
+            e.printStackTrace();
+            return false;
+
+        } finally {
+            em.close();
+        }
+    }
+    
+    @Override
+    public boolean altaCategoria(Categoria categoria){
+        if (categoria == null || buscarCategoria(categoria.getNombre()) != null) {
+            return false;
+        }
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+            em.persist(categoria);
+            tx.commit();
+            return true;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
@@ -288,5 +377,21 @@ public class ControladorCurso implements IControladorCurso {
             em.close();
         }
     }
+    
+    @Override
+    public Categoria buscarCategoria(String nombre){
+        if (nombre == null || nombre.trim().isEmpty()) {
+            return null;
+        }
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        try {
+            return em.find(Categoria.class, nombre);
+        } finally {
+            em.close();
+        }
+    }
 }
+
+
 

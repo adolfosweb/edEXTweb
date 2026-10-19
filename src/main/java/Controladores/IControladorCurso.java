@@ -6,6 +6,7 @@ package Controladores;
 import Logica.Curso;
 import Logica.EdicionCurso;
 import Logica.InscripcionCurso;
+import Logica.Categoria;
 import java.util.Map;
 
 /**
@@ -34,4 +35,9 @@ public interface IControladorCurso {
 
     boolean inscribirEstudiante(InscripcionCurso inscripcion);
     
+    boolean cambiarEstadoInscripcion(Long idInscripcion, Logica.EstadoInscripcion estado);
+    
+    boolean altaCategoria(Categoria categoria);
+    
+    Categoria buscarCategoria(String nombre);
 }
