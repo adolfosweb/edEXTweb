@@ -325,7 +325,7 @@
                 No se encontraron los datos del usuario.
             </div>
 
-            <a href="<%= request.getContextPath() %>/ConsultaUsuarioServlet"
+            <a href="<%= request.getContextPath() %>/buscador"
                class="btn btn-secondary">
                 Volver a la lista
             </a>
@@ -353,7 +353,7 @@
                 <% } %>
 
                 <!-- Volver a la lista de usuarios -->
-                <a href="<%= request.getContextPath() %>/ConsultaUsuarioServlet"
+                <a href="<%= request.getContextPath() %>/buscador"
                    class="perfil-volver"
                    title="Volver a la lista de usuarios"
                    aria-label="Volver a la lista de usuarios">
@@ -707,16 +707,11 @@
 
                                 <div class="perfil-elemento">
 
-                                    <div class="d-flex flex-wrap
-                                                justify-content-between
-                                                align-items-start gap-2">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
 
                                         <div>
                                             <h3 class="h6 mb-2">
-                                                <a class="link-primary text-decoration-none"
-                                                   href="<%= request.getContextPath() %>/ConsultaProgramaServlet?nombre=<%= URLEncoder.encode(programa.getNombre(), "UTF-8") %>">
-                                                    <%= programa.getNombre() %>
-                                                </a>
+                                                <%= programa.getNombre() %>
                                             </h3>
 
                                             <p class="text-secondary small mb-2">
@@ -728,12 +723,22 @@
                                             </p>
                                         </div>
 
-                                        <span class="perfil-estado <%= estado == EstadoInscripcion.ACEPTADA
-                                                    ? "aceptada"
-                                                    : estado == EstadoInscripcion.RECHAZADA
-                                                        ? "rechazada" : "inscripto" %>">
-                                            <%= estado %>
-                                        </span>
+                                        <div class="d-flex flex-column align-items-start gap-2">
+
+                                            <span class="perfil-estado <%= estado == EstadoInscripcion.ACEPTADA
+                                                        ? "aceptada"
+                                                        : estado == EstadoInscripcion.RECHAZADA
+                                                            ? "rechazada" : "inscripto" %>">
+                                                <%= estado %>
+                                            </span>
+
+                                            <a href="<%= request.getContextPath() %>/consultarPrograma?programa=<%= URLEncoder.encode(programa.getNombre(), "UTF-8") %>"
+                                               class="btn btn-outline-primary btn-sm">
+                                                Consultar programa
+                                                <i class="bi bi-arrow-right ms-1"></i>
+                                            </a>
+
+                                        </div>
 
                                     </div>
 
