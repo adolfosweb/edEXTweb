@@ -24,7 +24,7 @@ public class Instituto implements Serializable {
     private List<Docente> docentes = new ArrayList<>();
 
     @OneToMany(mappedBy = "instituto")
-    private List<Curso> cursos;
+    private List<Curso> cursos = new ArrayList<>();
 
     public Instituto() {
     }
