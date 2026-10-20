@@ -47,9 +47,45 @@
                      Cerrar sesión
                 </a>
 
-                <img src="https://placehold.co/40x40"
-                     alt="Foto de perfil"
-                     class="avatar-sm">
+                
+                    <%
+                        String[] extensionesFoto = {".jpg", ".jpeg", ".png"};
+                        String urlFoto = null;
+
+                        String directorioImagenes = application.getRealPath("/imagenesUsuarios");
+
+                        if (directorioImagenes != null && usuario != null) {
+                            java.nio.file.Path carpetaImagenes =
+                                java.nio.file.Paths.get(directorioImagenes);
+
+                            for (String extension : extensionesFoto) {
+                                java.nio.file.Path archivoFoto =
+                                    carpetaImagenes.resolve(usuario.getNickname() + extension);
+
+                                if (java.nio.file.Files.isRegularFile(archivoFoto)) {
+                                    urlFoto = request.getContextPath()
+                                        + "/imagenesUsuarios/"
+                                        + java.net.URLEncoder.encode(
+                                            usuario.getNickname(), "UTF-8")
+                                        + extension;
+                                    break;
+                                }
+                            }
+                        }
+                    %>
+
+                    <% if (urlFoto != null) { %>
+                        <img src="<%= urlFoto %>"
+                             alt="Foto de perfil de <%= usuario.getNickname() %>"
+                             class="avatar-sm rounded-circle">
+                    <% } else { %>
+                        <div class="avatar-sm d-flex align-items-center justify-content-center
+                                    rounded-circle bg-secondary text-white"
+                             title="Sin foto de perfil">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                    <% } %>
+
 
             <% } else { %>
 

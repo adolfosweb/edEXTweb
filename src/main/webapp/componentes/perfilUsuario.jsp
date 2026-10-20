@@ -11,6 +11,8 @@
 <%@page import="java.time.format.DateTimeFormatter"%>
 <%@page import="java.net.URLEncoder"%>
 <%@page import="java.io.File"%>
+<%@page import="java.util.List"%>
+<%@page import="java.util.Map"%>
 
 <%
     // Usuario cuyo perfil se está consultando
@@ -646,6 +648,11 @@
                                     }
 
                                     hayEdiciones = true;
+                                    Map<String, List<InscripcionCurso>> aceptadosPorEdicion =
+                                            (Map<String, List<InscripcionCurso>>) request.getAttribute("aceptadosPorEdicion");
+                                    List<InscripcionCurso> aceptados = aceptadosPorEdicion != null
+                                            ? aceptadosPorEdicion.get(edicion.getNombre()) : null;
+                                    String idAceptados = "aceptados_" + Integer.toUnsignedString(edicion.getNombre().hashCode());
                             %>
 
                                 <div class="perfil-elemento">
@@ -661,15 +668,49 @@
                                                 </p>
                                             <% } %>
                                         </div>
-                                        <div class="mt-3">
-                                            <a href="<%= request.getContextPath() %>/SvltConsultarCurso?nombre=<%= URLEncoder.encode(edicion.getCurso().getNombre(), "UTF-8") %>&amp;edicion=<%= URLEncoder.encode(edicion.getNombre(), "UTF-8") %>"
-                                               class="btn btn-outline-primary btn-sm">
-                                                Consultar edición
-                                                <i class="bi bi-arrow-right ms-1"></i>
-                                            </a>
+                                        <div class="mt-3 d-flex flex-wrap gap-2">
+                                            <% if (edicion.getCurso() != null) { %>
+                                                <a href="<%= request.getContextPath() %>/SvltConsultarCurso?nombre=<%= URLEncoder.encode(edicion.getCurso().getNombre(), "UTF-8") %>&amp;edicion=<%= URLEncoder.encode(edicion.getNombre(), "UTF-8") %>"
+                                                   class="btn btn-outline-primary btn-sm">
+                                                    Consultar edición
+                                                    <i class="bi bi-arrow-right ms-1"></i>
+                                                </a>
+                                            <% } %>
+
+                                            <% if (esPropioPerfil) { %>
+                                                <button type="button"
+                                                        class="btn btn-outline-success btn-sm"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target="#<%= idAceptados %>"
+                                                        aria-expanded="false"
+                                                        aria-controls="<%= idAceptados %>">
+                                                    Ver estudiantes aceptados
+                                                </button>
+                                            <% } %>
                                         </div>
                                     </div>
 
+                                    <% if (esPropioPerfil) { %>
+                                        <div class="collapse mt-3" id="<%= idAceptados %>">
+                                            <% if (aceptados == null || aceptados.isEmpty()) { %>
+                                                <p class="text-secondary small mb-0">
+                                                    No hay estudiantes aceptados en esta edición.
+                                                </p>
+                                            <% } else { %>
+                                                <ul class="list-group">
+                                                    <% for (InscripcionCurso inscripcionAceptada : aceptados) { %>
+                                                        <li class="list-group-item">
+                                                            <strong><%= inscripcionAceptada.getEstudiante().getNombre() %>
+                                                            <%= inscripcionAceptada.getEstudiante().getApellido() %></strong>
+                                                            <div class="text-secondary small">
+                                                                Nickname: <%= inscripcionAceptada.getEstudiante().getNickname() %>
+                                                            </div>
+                                                        </li>
+                                                    <% } %>
+                                                </ul>
+                                            <% } %>
+                                        </div>
+                                    <% } %>
                                 </div>
                                     
                             <% } %>
@@ -700,20 +741,22 @@
                                      role="tabpanel">
 
                                 <h2 class="h5 mb-3">Programas de formación</h2>
-
+                                
                                 <%
                                     boolean hayProgramas = false;
-
+                                    
                                     for (InscripcionPrograma inscripcion
                                             : estudiante.getProgramas()) {
 
                                         EstadoInscripcion estado = inscripcion.getEstado();
+                                        
 
                                         boolean mostrar =
                                                 estado == EstadoInscripcion.INSCRIPTO
                                                 || estado == EstadoInscripcion.ACEPTADA
                                                 || (esPropioPerfil
                                                     && estado == EstadoInscripcion.RECHAZADA);
+                                        
 
                                         if (!mostrar) {
                                             continue;
@@ -787,6 +830,8 @@
 
         </main>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         const pestanas = document.querySelectorAll(".perfil-pestana");
