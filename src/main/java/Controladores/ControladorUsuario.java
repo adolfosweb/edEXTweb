@@ -24,7 +24,7 @@ public class ControladorUsuario implements IControladorUsuario {
     }
 
     @Override
-public boolean altaUsuario(Usuario usuario, String nombreInstituto) {
+    public boolean altaUsuario(Usuario usuario, String nombreInstituto) {
 
     if (usuario == null || usuario.getNickname() == null
             || usuario.getNickname().trim().isEmpty()) {

@@ -7,6 +7,7 @@ import Logica.Curso;
 import Logica.EdicionCurso;
 import Logica.InscripcionCurso;
 import Logica.Categoria;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,6 +37,10 @@ public interface IControladorCurso {
     boolean inscribirEstudiante(InscripcionCurso inscripcion);
     
     boolean cambiarEstadoInscripcion(Long idInscripcion, Logica.EstadoInscripcion estado);
+    
+    public List<InscripcionCurso> listarInscripcionesEstudiante(String nickname);
+    
+    public List<InscripcionCurso> listarInscripcionesEdicion(String nombreEdicion);
     
     boolean altaCategoria(Categoria categoria);
     

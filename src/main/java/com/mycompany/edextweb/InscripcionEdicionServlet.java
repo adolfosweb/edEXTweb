@@ -1,4 +1,3 @@
-
 package com.mycompany.edextweb;
 
 import Controladores.ControladorCurso;
@@ -20,8 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet(name = "InscripcionEdicionServlet",
-            urlPatterns = {"/inscripcionEdicion"})
+@WebServlet(name = "InscripcionEdicionServlet", urlPatterns = {"/inscripcionEdicion"})
 public class InscripcionEdicionServlet extends HttpServlet {
 
     private ControladorInstituto controladorInstituto;
@@ -34,15 +32,13 @@ public class InscripcionEdicionServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         mostrarPagina(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
@@ -50,8 +46,7 @@ public class InscripcionEdicionServlet extends HttpServlet {
         String contexto = request.getContextPath();
         HttpSession session = request.getSession(false);
 
-        if (session == null
-                || !(session.getAttribute("usuario") instanceof Usuario)) {
+        if (session == null || !(session.getAttribute("usuario") instanceof Usuario)) {
             response.sendRedirect(contexto + "/componentes/login.jsp");
             return;
         }
@@ -59,10 +54,7 @@ public class InscripcionEdicionServlet extends HttpServlet {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 
         if (!(usuario instanceof Estudiante)) {
-            request.setAttribute(
-                "error",
-                "Solo los estudiantes pueden inscribirse a ediciones de cursos."
-            );
+            request.setAttribute("error","Solo los estudiantes pueden inscribirse a ediciones de cursos.");
             mostrarPagina(request, response);
             return;
         }
@@ -72,131 +64,87 @@ public class InscripcionEdicionServlet extends HttpServlet {
 
         if (nombreInstituto == null || nombreInstituto.isBlank()
                 || nombreEdicion == null || nombreEdicion.isBlank()) {
-            request.setAttribute(
-                "error",
-                "No se especificó el instituto o la edición."
-            );
+            request.setAttribute("error","No se especificó el instituto o la edición.");
             mostrarPagina(request, response);
             return;
         }
 
-        Instituto instituto =
-            controladorInstituto.buscarInstituto(nombreInstituto);
+        Instituto instituto = controladorInstituto.buscarInstituto(nombreInstituto);
 
-        EdicionCurso edicion =
-            controladorCurso.buscarEdicion(nombreEdicion);
+        EdicionCurso edicion = controladorCurso.buscarEdicion(nombreEdicion);
 
         if (instituto == null || edicion == null
                 || edicion.getCurso() == null
                 || edicion.getCurso().getInstituto() == null
-                || !nombreInstituto.equals(
-                    edicion.getCurso().getInstituto().getNombre())) {
-            request.setAttribute(
-                "error",
-                "No se encontró la edición seleccionada en ese instituto."
-            );
+                || !nombreInstituto.equals(edicion.getCurso().getInstituto().getNombre())) {
+            request.setAttribute("error","No se encontró la edición seleccionada en ese instituto.");
             mostrarPagina(request, response);
             return;
         }
 
         Estudiante estudiante = (Estudiante) usuario;
 
-        InscripcionCurso existente = controladorCurso.buscarInscripcion(
-            estudiante.getNickname(),
-            edicion.getNombre()
-        );
+        InscripcionCurso existente = controladorCurso.buscarInscripcion(estudiante.getNickname(),edicion.getNombre());
 
         if (existente != null) {
-            request.setAttribute(
-                "error",
-                "Ya estás inscrito en esta edición."
-            );
+            request.setAttribute("error","Ya estás inscrito en esta edición.");
             mostrarPagina(request, response);
             return;
         }
 
-        InscripcionCurso inscripcion = new InscripcionCurso(
-            estudiante,
-            LocalDate.now(),
-            edicion
-        );
+        InscripcionCurso inscripcion = new InscripcionCurso(estudiante,LocalDate.now(),edicion);
 
-        boolean resultado =
-            controladorCurso.inscribirEstudiante(inscripcion);
+        boolean resultado = controladorCurso.inscribirEstudiante(inscripcion);
 
         if (resultado) {
-            request.setAttribute(
-                "mensaje",
-                "Te inscribiste correctamente a la edición "
-                    + edicion.getNombre() + "."
-            );
+            request.setAttribute("mensaje","Te inscribiste correctamente a la edición "+ edicion.getNombre() + ".");
         } else {
-            request.setAttribute(
-                "error",
+            request.setAttribute("error",
                 "No se pudo completar la inscripción. "
-                    + "Es posible que no haya cupos disponibles "
-                    + "o que haya ocurrido un error."
+              + "Es posible que no haya cupos disponibles "
+              + "o que haya ocurrido un error."
             );
         }
 
         mostrarPagina(request, response);
     }
 
-    private void mostrarPagina(HttpServletRequest request,
-                               HttpServletResponse response)
+    private void mostrarPagina(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        Map<String, Instituto> institutos =
-            controladorInstituto.listarInstitutos();
+        Map<String, Instituto> institutos = controladorInstituto.listarInstitutos();
 
         request.setAttribute("institutos", institutos);
 
         String nombreInstituto = request.getParameter("instituto");
 
         if (nombreInstituto != null && !nombreInstituto.isBlank()) {
-            Instituto instituto =
-                controladorInstituto.buscarInstituto(nombreInstituto);
+            Instituto instituto = controladorInstituto.buscarInstituto(nombreInstituto);
 
             if (instituto != null) {
                 request.setAttribute("institutoSeleccionado", instituto);
 
-                Map<String, EdicionCurso> todasLasEdiciones =
-                    controladorCurso.listarEdiciones();
+                Map<String, EdicionCurso> todasLasEdiciones = controladorCurso.listarEdiciones();
 
-                Map<String, List<EdicionCurso>> edicionesPorCurso =
-                    new HashMap<>();
+                Map<String, List<EdicionCurso>> edicionesPorCurso = new HashMap<>();
 
                 for (EdicionCurso edicion : todasLasEdiciones.values()) {
                     if (edicion.getCurso() != null
                             && edicion.getCurso().getInstituto() != null
-                            && nombreInstituto.equals(
-                                edicion.getCurso().getInstituto().getNombre())) {
+                            && nombreInstituto.equals(edicion.getCurso().getInstituto().getNombre())) {
 
                         String nombreCurso = edicion.getCurso().getNombre();
 
-                        edicionesPorCurso
-                            .computeIfAbsent(
-                                nombreCurso,
-                                k -> new java.util.ArrayList<>()
-                            )
-                            .add(edicion);
+                        edicionesPorCurso.computeIfAbsent(nombreCurso,k -> new java.util.ArrayList<>()).add(edicion);
                     }
                 }
 
-                request.setAttribute(
-                    "edicionesPorCurso",
-                    edicionesPorCurso
-                );
+                request.setAttribute("edicionesPorCurso",edicionesPorCurso);
             } else {
-                request.setAttribute(
-                    "error",
-                    "No se encontró el instituto seleccionado."
-                );
+                request.setAttribute("error","No se encontró el instituto seleccionado.");
             }
         }
 
-        request.getRequestDispatcher(
-            "/componentes/inscripcionEdicion.jsp"
-        ).forward(request, response);
+        request.getRequestDispatcher("/componentes/inscripcionEdicion.jsp").forward(request, response);
     }
 }

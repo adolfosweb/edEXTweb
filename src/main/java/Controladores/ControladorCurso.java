@@ -354,6 +354,45 @@ public class ControladorCurso implements IControladorCurso {
     }
     
     @Override
+    public List<InscripcionCurso> listarInscripcionesEstudiante(String nickname) {
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT i FROM InscripcionCurso i "
+                    + "JOIN FETCH i.edicionCurso ed "
+                    + "JOIN FETCH ed.curso "
+                    + "WHERE i.estudiante.nickname = :nickname",
+                    InscripcionCurso.class
+            ).setParameter("nickname", nickname).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+    
+    @Override
+    public List<InscripcionCurso> listarInscripcionesEdicion(String nombreEdicion) {
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+
+        try {
+            return em.createQuery(
+                    "SELECT i FROM InscripcionCurso i "
+                    + "JOIN FETCH i.estudiante "
+                    + "JOIN FETCH i.edicionCurso ed "
+                    + "JOIN FETCH ed.curso "
+                    + "WHERE ed.nombre = :nombreEdicion "
+                    + "ORDER BY i.fechaInscripcion",
+                    InscripcionCurso.class
+            )
+            .setParameter("nombreEdicion", nombreEdicion)
+            .getResultList();
+
+        } finally {
+            em.close();
+        }
+    }
+    
+    @Override
     public boolean altaCategoria(Categoria categoria){
         if (categoria == null || buscarCategoria(categoria.getNombre()) != null) {
             return false;
@@ -392,6 +431,3 @@ public class ControladorCurso implements IControladorCurso {
         }
     }
 }
-
-
-

@@ -7,9 +7,9 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%
     ControladorInstituto controladorInstituto = new ControladorInstituto();
-    Map<String, Instituto> institutos = controladorInstituto.listarInstitutos();
+    Map<String, Instituto> institutosMenu = controladorInstituto.listarInstitutos();
     Usuario usuario = (Logica.Usuario) session.getAttribute("usuario");
-    request.setAttribute("institutos", institutos);
+    request.setAttribute("institutosMenu", institutosMenu);
 %>
 <aside class="bg-dark border-end p-1" style="width: 250px; min-height: calc(100vh - 70px);">
     <% 
@@ -19,7 +19,7 @@
     <div>
         <ul class="list-unstyled">
             <li class="mb-1"><a href="<%= request.getContextPath() %>/PerfilUsuarioServlet?nickname=<%= java.net.URLEncoder.encode(usuario.getNickname(), "UTF-8") %>" 
-                                class="text-uppercase text-secondary fw-bold text-white">Mi Perfil</a></li>
+                                class="text-uppercase text-secondary fw-bold text-white text-decoration-none">Mi Perfil</a></li>
         </ul>
     </div>
     <% } %>
@@ -28,11 +28,11 @@
     if(usuario instanceof Estudiante){
     %>
     <div>
-        <h6 class="text-uppercase text-secondary fw-bold text-white">Inscripciones</h6>
+        <h6 class="text-uppercase text-secondary fw-bold text-white text-decoration-none">Inscripciones</h6>
         <ul class="list-unstyled">
             <li class="mb-1"><a href="${pageContext.request.contextPath}/inscripcionEdicion" class="text-decoration-none text-white">Inscribirme a curso</a></li>
             <li class="mb-1"><a href="${pageContext.request.contextPath}/inscripcionPrograma" class="text-decoration-none text-white">Inscribirme a programa</a></li>
-            <li class="mb-1"><a href="#" class="text-decoration-none text-white">Resultados</a></li>
+            <li class="mb-1"><a href="${pageContext.request.contextPath}/resultadosInscripciones" class="text-decoration-none text-white">Resultados</a></li>
         </ul>
     </div>
     <hr class="border border-light border-1 opacity-100">
@@ -41,11 +41,12 @@
     %>
     <div>
         <ul class="list-unstyled">
-            <li class="mb-1"><a href="${pageContext.request.contextPath}/SvltListarCursos" class="text-uppercase text-secondary fw-bold text-white">Cursos</a></li>
+            <li class="mb-1"><a href="${pageContext.request.contextPath}/SvltListarCursos" class="text-uppercase text-secondary fw-bold text-white text-decoration-none">Cursos</a></li>
             <li class="mb-1"><a href="${pageContext.request.contextPath}/AltaCurso" class="text-decoration-none text-white">Alta curso</a></li>
             <li class="mb-1"><a href="${pageContext.request.contextPath}/SvltListarCursos" class="text-decoration-none text-white">Alta edicion</a></li><!--$ {pageContext.request.contextPath}/SvltAltaEdicionCurso-->
             <li class="mb-1"><a href="${pageContext.request.contextPath}/crearPrograma" class="text-decoration-none text-white">Alta programa</a></li>
             <li class="mb-1"><a href="${pageContext.request.contextPath}/agregarCursoAPrograma" class="text-decoration-none text-white">Agregar curso a programa</a></li>
+            <li class="mb-1"><a href="${pageContext.request.contextPath}/seleccionarEstudiantes" class="text-decoration-none text-white">Selección estudiantes</a></li>
         </ul>
     </div>
     <hr class="border border-light border-1 opacity-100">
@@ -57,8 +58,8 @@
         <h6 class="text-uppercase fw-bold text-white">Institutos</h6>
         <ul class="list-unstyled">
             <c:choose>
-                <c:when test="${not empty institutos}">
-                    <c:forEach var="entrada" items="${institutos}">
+                <c:when test="${not empty institutosMenu}">
+                    <c:forEach var="entrada" items="${institutosMenu}">
                         <li class="mb-1">
                             <a href="#" class="text-decoration-none text-white"><c:out value="${entrada.key}" /></a>
                         </li>
@@ -81,4 +82,18 @@
         </ul>
     </div>
     <hr class="border border-light border-1 opacity-100">
+    <% 
+    if (usuario != null) 
+    { %>
+    <div>
+        <ul class="list-unstyled">
+            <li class="mb-1">
+                <a href="${pageContext.request.contextPath}/LogoutServlet" class="text-uppercase text-secondary fw-bold text-white text-decoration-none">
+                    <i class="bi bi-box-arrow-right me-2"></i>Salir
+                </a>
+            </li>
+        </ul>
+    </div>
+    <hr class="border border-light border-1 opacity-100">
+    <% } %>
 </aside>

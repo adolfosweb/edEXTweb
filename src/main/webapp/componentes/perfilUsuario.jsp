@@ -316,374 +316,264 @@
 <body class="bg-light">
 
     <jsp:include page="header.jsp" />
+    <div class="d-flex">
+        <jsp:include page="menulateral.jsp"/>
+        <main class="container-fluid py-4 px-4">
 
-    <main class="container py-4">
+            <% if (usuario == null) { %>
 
-        <% if (usuario == null) { %>
+                <div class="alert alert-warning">
+                    No se encontraron los datos del usuario.
+                </div>
 
-            <div class="alert alert-warning">
-                No se encontraron los datos del usuario.
-            </div>
-
-            <a href="<%= request.getContextPath() %>/buscador"
-               class="btn btn-secondary">
-                Volver a la lista
-            </a>
-
-        <% } else { %>
-
-            <div class="perfil-contenedor">
-
-                <% if ("1".equals(request.getParameter("actualizado"))) { %>
-                    <div class="alert alert-success" role="alert">
-                        Los datos del usuario se actualizaron correctamente.
-                    </div>
-                <% } %>
-
-                <% if ("1".equals(request.getParameter("fotoActualizada"))) { %>
-                    <div class="alert alert-success" role="alert">
-                        La foto de perfil se actualizó correctamente.
-                    </div>
-                <% } %>
-
-                <% if ("1".equals(request.getParameter("errorFoto"))) { %>
-                    <div class="alert alert-danger" role="alert">
-                        No se pudo actualizar la foto. Verificá el archivo e intentá nuevamente.
-                    </div>
-                <% } %>
-
-                <!-- Volver a la lista de usuarios -->
-                <a href="javascript:history.back()"
-                   class="perfil-volver"
-                   title="Volver a la lista de usuarios"
-                   aria-label="Volver a la lista de usuarios">
-
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         fill="none"
-                         viewBox="0 0 24 24"
-                         stroke="currentColor"
-                         stroke-width="2"
-                         stroke-linecap="round"
-                         stroke-linejoin="round">
-                        <path d="M19 12H5"/>
-                        <path d="M12 19l-7-7 7-7"/>
-                    </svg>
-
+                <a href="<%= request.getContextPath() %>/buscador"
+                   class="btn btn-secondary">
+                    Volver a la lista
                 </a>
 
-                <!-- Cabecera del perfil -->
-                <div class="perfil-cabecera">
+            <% } else { %>
 
-                    <% if (esPropioPerfil) { %>
+                <div class="perfil-contenedor">
 
-                        <!-- La foto del propio usuario permite cambiarla -->
-                        <a href="<%= request.getContextPath() %>/ModificarImagenPerfilServlet?nickname=<%= URLEncoder.encode(nickname, "UTF-8") %>"
-                           class="perfil-foto-boton"
-                           title="Cambiar foto de perfil"
-                           aria-label="Cambiar foto de perfil">
-
-                            <% if (!urlFoto.isEmpty()) { %>
-
-                                <img src="<%= urlFoto %>"
-                                     alt="Foto de perfil de <%= nickname %>">
-
-                            <% } else { %>
-
-                                <span>Sin foto</span>
-
-                            <% } %>
-
-                            <span class="perfil-foto-overlay">
-                                Cambiar foto
-                            </span>
-
-                        </a>
-
-                    <% } else { %>
-
-                        <!-- En perfiles ajenos la foto no es editable -->
-                        <div class="perfil-foto-boton"
-                             style="cursor: default">
-
-                            <% if (!urlFoto.isEmpty()) { %>
-
-                                <img src="<%= urlFoto %>"
-                                     alt="Foto de perfil de <%= nickname %>">
-
-                            <% } else { %>
-
-                                <span>Sin foto</span>
-
-                            <% } %>
-
+                    <% if ("1".equals(request.getParameter("actualizado"))) { %>
+                        <div class="alert alert-success" role="alert">
+                            Los datos del usuario se actualizaron correctamente.
                         </div>
-
                     <% } %>
 
-                    <div>
-                        <h1 class="perfil-nombre">
-                            <%= apellido %> <%= nombre %>
-                        </h1>
-
-                        <div class="perfil-correo">
-                            <%= correo %>
+                    <% if ("1".equals(request.getParameter("fotoActualizada"))) { %>
+                        <div class="alert alert-success" role="alert">
+                            La foto de perfil se actualizó correctamente.
                         </div>
+                    <% } %>
 
-                        <div class="text-secondary small">
-                            Nickname: <%= nickname %>
+                    <% if ("1".equals(request.getParameter("errorFoto"))) { %>
+                        <div class="alert alert-danger" role="alert">
+                            No se pudo actualizar la foto. Verificá el archivo e intentá nuevamente.
                         </div>
+                    <% } %>
+
+                    <!-- Volver a la lista de usuarios -->
+                    <a href="javascript:history.back()"
+                       class="perfil-volver"
+                       title="Volver a la lista de usuarios"
+                       aria-label="Volver a la lista de usuarios">
+
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor"
+                             stroke-width="2"
+                             stroke-linecap="round"
+                             stroke-linejoin="round">
+                            <path d="M19 12H5"/>
+                            <path d="M12 19l-7-7 7-7"/>
+                        </svg>
+
+                    </a>
+
+                    <!-- Cabecera del perfil -->
+                    <div class="perfil-cabecera">
 
                         <% if (esPropioPerfil) { %>
 
-                            <a href="<%= request.getContextPath() %>/ModificarDatosUsuarioServlet?nickname=<%= URLEncoder.encode(nickname, "UTF-8") %>"
-                               class="btn btn-outline-primary mt-2">
-                                Modificar datos
-                            </a>
+                            <!-- La foto del propio usuario permite cambiarla -->
+                            <a href="<%= request.getContextPath() %>/ModificarImagenPerfilServlet?nickname=<%= URLEncoder.encode(nickname, "UTF-8") %>"
+                               class="perfil-foto-boton"
+                               title="Cambiar foto de perfil"
+                               aria-label="Cambiar foto de perfil">
 
-                        <% } %>
-                        
-                        <%
-                            Object usuarioSesionAtributo =
-                                    session.getAttribute("usuario");
+                                <% if (!urlFoto.isEmpty()) { %>
 
-                            boolean haySesion =
-                                    usuarioSesionAtributo instanceof Usuario;
-                        %>
-
-                        <% if (!esPropioPerfil && haySesion) { %>
-
-                            <form action="<%= request.getContextPath() %>/SeguirUsuarioServlet"
-                                  method="post"
-                                  class="mt-2">
-
-                                <input type="hidden"
-                                       name="nickname"
-                                       value="<%= nickname %>">
-
-                                <% if (Boolean.TRUE.equals(request.getAttribute("siguiendo"))) { %>
-
-                                    <input type="hidden"
-                                           name="accion"
-                                           value="dejarDeSeguir">
-
-                                    <button type="submit"
-                                            class="btn btn-outline-secondary">
-                                        Dejar de seguir
-                                    </button>
+                                    <img src="<%= urlFoto %>"
+                                         alt="Foto de perfil de <%= nickname %>">
 
                                 <% } else { %>
 
-                                    <input type="hidden"
-                                           name="accion"
-                                           value="seguir">
-
-                                    <button type="submit"
-                                            class="btn btn-primary">
-                                        Seguir
-                                    </button>
+                                    <span>Sin foto</span>
 
                                 <% } %>
 
-                            </form>
-
-                        <% } %>
-                    </div>
-
-                </div>
-
-                <!-- Pestañas -->
-                <div class="perfil-pestanas" role="tablist">
-
-                    <button type="button"
-                            class="perfil-pestana activa"
-                            data-seccion="general"
-                            role="tab"
-                            aria-selected="true">
-                        GENERAL
-                    </button>
-
-                    <button type="button"
-                            class="perfil-pestana"
-                            data-seccion="cursos"
-                            role="tab"
-                            aria-selected="false">
-                        CURSOS
-                    </button>
-
-                    <% if (esEstudiante) { %>
-                        <button type="button"
-                                class="perfil-pestana"
-                                data-seccion="programas"
-                                role="tab"
-                                aria-selected="false">
-                            PROGRAMAS
-                        </button>
-                    <% } %>
-
-                </div>
-
-                <div class="perfil-panel">
-
-                    <!-- GENERAL -->
-                    <section id="general"
-                             class="perfil-seccion activa"
-                             role="tabpanel">
-
-                        <div class="perfil-dato">
-                            <span class="perfil-etiqueta">Nickname</span>
-                            <div class="perfil-valor"><%= nickname %></div>
-                        </div>
-
-                        <div class="perfil-dato">
-                            <span class="perfil-etiqueta">Nombre</span>
-                            <div class="perfil-valor"><%= nombre %></div>
-                        </div>
-
-                        <div class="perfil-dato">
-                            <span class="perfil-etiqueta">Apellido</span>
-                            <div class="perfil-valor"><%= apellido %></div>
-                        </div>
-
-                        <div class="perfil-dato">
-                            <span class="perfil-etiqueta">Correo electrónico</span>
-                            <div class="perfil-valor"><%= correo %></div>
-                        </div>
-
-                        <div class="perfil-dato">
-                            <span class="perfil-etiqueta">Fecha de nacimiento</span>
-                            <div class="perfil-valor">
-                                <%= fechaNacimiento.isEmpty()
-                                        ? "No especificada" : fechaNacimiento %>
-                            </div>
-                        </div>
-
-                    </section>
-
-                    <!-- CURSOS -->
-                    <section id="cursos"
-                             class="perfil-seccion"
-                             role="tabpanel">
-
-                        <h2 class="h5 mb-3">
-                            <%= esEstudiante ? "Mis cursos" : "Ediciones de cursos" %>
-                        </h2>
-
-                        <% if (esEstudiante) {
-                            Estudiante estudiante = (Estudiante) usuario;
-                            boolean hayCursos = false;
-
-                            for (InscripcionCurso inscripcion : estudiante.getCursos()) {
-                                EstadoInscripcion estado = inscripcion.getEstado();
-
-                                boolean mostrar =
-                                        estado == EstadoInscripcion.INSCRIPTO
-                                        || estado == EstadoInscripcion.ACEPTADA
-                                        || (esPropioPerfil
-                                            && estado == EstadoInscripcion.RECHAZADA);
-
-                                if (!mostrar) {
-                                    continue;
-                                }
-
-                                EdicionCurso edicion = inscripcion.getCurso();
-
-                                if (edicion == null) {
-                                    continue;
-                                }
-
-                                hayCursos = true;
-                        %>
-
-                            <div class="perfil-elemento">
-
-                                <h3 class="h6 mb-2">
-                                    <%= edicion.getNombre() %>
-                                </h3>
-
-                                <% if (edicion.getCurso() != null) { %>
-                                    <p class="text-secondary mb-2">
-                                        Curso: <%= edicion.getCurso().getNombre() %>
-                                    </p>
-                                <% } %>
-
-                                <span class="perfil-estado <%= estado == EstadoInscripcion.ACEPTADA
-                                            ? "aceptada"
-                                            : estado == EstadoInscripcion.RECHAZADA
-                                                ? "rechazada" : "inscripto" %>">
-                                    <%= estado %>
+                                <span class="perfil-foto-overlay">
+                                    Cambiar foto
                                 </span>
 
-                            </div>
-
-                        <% } %>
-
-                            <% if (!hayCursos) { %>
-                                <p class="text-secondary mb-0">
-                                    No hay cursos para mostrar.
-                                </p>
-                            <% } %>
-
-                        <% } else if (esDocente) {
-                            Docente docente = (Docente) usuario;
-                            boolean hayEdiciones = false;
-
-                            for (EdicionCurso edicion : docente.getEdiciones()) {
-                                if (edicion == null) {
-                                    continue;
-                                }
-
-                                hayEdiciones = true;
-                        %>
-
-                            <div class="perfil-elemento">
-
-                                <h3 class="h6 mb-2">
-                                    <%= edicion.getNombre() %>
-                                </h3>
-
-                                <% if (edicion.getCurso() != null) { %>
-                                    <p class="text-secondary mb-0">
-                                        Curso: <%= edicion.getCurso().getNombre() %>
-                                    </p>
-                                <% } %>
-
-                            </div>
-
-                        <% } %>
-
-                            <% if (!hayEdiciones) { %>
-                                <p class="text-secondary mb-0">
-                                    No hay ediciones de cursos para mostrar.
-                                </p>
-                            <% } %>
+                            </a>
 
                         <% } else { %>
 
-                            <p class="text-secondary mb-0">
-                                No hay cursos asociados a este usuario.
-                            </p>
+                            <!-- En perfiles ajenos la foto no es editable -->
+                            <div class="perfil-foto-boton"
+                                 style="cursor: default">
+
+                                <% if (!urlFoto.isEmpty()) { %>
+
+                                    <img src="<%= urlFoto %>"
+                                         alt="Foto de perfil de <%= nickname %>">
+
+                                <% } else { %>
+
+                                    <span>Sin foto</span>
+
+                                <% } %>
+
+                            </div>
 
                         <% } %>
 
-                    </section>
+                        <div>
+                            <h1 class="perfil-nombre">
+                                <%= apellido %> <%= nombre %>
+                            </h1>
 
-                    <!-- PROGRAMAS: solamente para estudiantes -->
-                    <% if (esEstudiante) {
-                        Estudiante estudiante = (Estudiante) usuario;
-                    %>
+                            <div class="perfil-correo">
+                                <%= correo %>
+                            </div>
 
-                        <section id="programas"
+                            <div class="text-secondary small">
+                                Nickname: <%= nickname %>
+                            </div>
+
+                            <% if (esPropioPerfil) { %>
+
+                                <a href="<%= request.getContextPath() %>/ModificarDatosUsuarioServlet?nickname=<%= URLEncoder.encode(nickname, "UTF-8") %>"
+                                   class="btn btn-outline-primary mt-2">
+                                    Modificar datos
+                                </a>
+
+                            <% } %>
+
+                            <%
+                                Object usuarioSesionAtributo =
+                                        session.getAttribute("usuario");
+
+                                boolean haySesion =
+                                        usuarioSesionAtributo instanceof Usuario;
+                            %>
+
+                            <% if (!esPropioPerfil && haySesion) { %>
+
+                                <form action="<%= request.getContextPath() %>/SeguirUsuarioServlet"
+                                      method="post"
+                                      class="mt-2">
+
+                                    <input type="hidden"
+                                           name="nickname"
+                                           value="<%= nickname %>">
+
+                                    <% if (Boolean.TRUE.equals(request.getAttribute("siguiendo"))) { %>
+
+                                        <input type="hidden"
+                                               name="accion"
+                                               value="dejarDeSeguir">
+
+                                        <button type="submit"
+                                                class="btn btn-outline-secondary">
+                                            Dejar de seguir
+                                        </button>
+
+                                    <% } else { %>
+
+                                        <input type="hidden"
+                                               name="accion"
+                                               value="seguir">
+
+                                        <button type="submit"
+                                                class="btn btn-primary">
+                                            Seguir
+                                        </button>
+
+                                    <% } %>
+
+                                </form>
+
+                            <% } %>
+                        </div>
+
+                    </div>
+
+                    <!-- Pestañas -->
+                    <div class="perfil-pestanas" role="tablist">
+
+                        <button type="button"
+                                class="perfil-pestana activa"
+                                data-seccion="general"
+                                role="tab"
+                                aria-selected="true">
+                            GENERAL
+                        </button>
+
+                        <button type="button"
+                                class="perfil-pestana"
+                                data-seccion="cursos"
+                                role="tab"
+                                aria-selected="false">
+                            CURSOS
+                        </button>
+
+                        <% if (esEstudiante) { %>
+                            <button type="button"
+                                    class="perfil-pestana"
+                                    data-seccion="programas"
+                                    role="tab"
+                                    aria-selected="false">
+                                PROGRAMAS
+                            </button>
+                        <% } %>
+
+                    </div>
+
+                    <div class="perfil-panel">
+
+                        <!-- GENERAL -->
+                        <section id="general"
+                                 class="perfil-seccion activa"
+                                 role="tabpanel">
+
+                            <div class="perfil-dato">
+                                <span class="perfil-etiqueta">Nickname</span>
+                                <div class="perfil-valor"><%= nickname %></div>
+                            </div>
+
+                            <div class="perfil-dato">
+                                <span class="perfil-etiqueta">Nombre</span>
+                                <div class="perfil-valor"><%= nombre %></div>
+                            </div>
+
+                            <div class="perfil-dato">
+                                <span class="perfil-etiqueta">Apellido</span>
+                                <div class="perfil-valor"><%= apellido %></div>
+                            </div>
+
+                            <div class="perfil-dato">
+                                <span class="perfil-etiqueta">Correo electrónico</span>
+                                <div class="perfil-valor"><%= correo %></div>
+                            </div>
+
+                            <div class="perfil-dato">
+                                <span class="perfil-etiqueta">Fecha de nacimiento</span>
+                                <div class="perfil-valor">
+                                    <%= fechaNacimiento.isEmpty()
+                                            ? "No especificada" : fechaNacimiento %>
+                                </div>
+                            </div>
+
+                        </section>
+
+                        <!-- CURSOS -->
+                        <section id="cursos"
                                  class="perfil-seccion"
                                  role="tabpanel">
 
-                            <h2 class="h5 mb-3">Programas de formación</h2>
+                            <h2 class="h5 mb-3">
+                                <%= esEstudiante ? "Mis cursos" : "Ediciones de cursos" %>
+                            </h2>
 
-                            <%
-                                boolean hayProgramas = false;
+                            <% if (esEstudiante) {
+                                Estudiante estudiante = (Estudiante) usuario;
+                                boolean hayCursos = false;
 
-                                for (InscripcionPrograma inscripcion
-                                        : estudiante.getProgramas()) {
-
+                                for (InscripcionCurso inscripcion : estudiante.getCursos()) {
                                     EstadoInscripcion estado = inscripcion.getEstado();
 
                                     boolean mostrar =
@@ -696,73 +586,207 @@
                                         continue;
                                     }
 
-                                    ProgramaFormacion programa = inscripcion.getPrograma();
+                                    EdicionCurso edicion = inscripcion.getCurso();
 
-                                    if (programa == null) {
+                                    if (edicion == null) {
                                         continue;
                                     }
 
-                                    hayProgramas = true;
+                                    hayCursos = true;
                             %>
 
                                 <div class="perfil-elemento">
-
                                     <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
-
                                         <div>
+
                                             <h3 class="h6 mb-2">
-                                                <%= programa.getNombre() %>
+                                                <%= edicion.getNombre() %>
                                             </h3>
 
-                                            <p class="text-secondary small mb-2">
-                                                Fecha de inscripción:
-                                                <%= inscripcion.getFechaIns() != null
-                                                        ? inscripcion.getFechaIns().format(
-                                                            DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                                                        : "No especificada" %>
-                                            </p>
+                                            <% if (edicion.getCurso() != null) { %>
+                                                <p class="text-secondary mb-2">
+                                                    Curso: <%= edicion.getCurso().getNombre() %>
+                                                </p>
+                                            <% } %>
                                         </div>
-
-                                        <div class="d-flex flex-column align-items-start gap-2">
-
+                                            <div>
                                             <span class="perfil-estado <%= estado == EstadoInscripcion.ACEPTADA
                                                         ? "aceptada"
                                                         : estado == EstadoInscripcion.RECHAZADA
                                                             ? "rechazada" : "inscripto" %>">
                                                 <%= estado %>
                                             </span>
-
-                                            <a href="<%= request.getContextPath() %>/consultarPrograma?programa=<%= URLEncoder.encode(programa.getNombre(), "UTF-8") %>"
-                                               class="btn btn-outline-primary btn-sm">
-                                                Consultar programa
-                                                <i class="bi bi-arrow-right ms-1"></i>
-                                            </a>
-
+                                            <div class="mt-3">
+                                                <a href="<%= request.getContextPath() %>/SvltConsultarCurso?nombre=<%= URLEncoder.encode(edicion.getCurso().getNombre(), "UTF-8") %>&amp;edicion=<%= URLEncoder.encode(edicion.getNombre(), "UTF-8") %>"
+                                                   class="btn btn-outline-primary btn-sm">
+                                                    Consultar edición
+                                                    <i class="bi bi-arrow-right ms-1"></i>
+                                                </a>
+                                            </div>
                                         </div>
-
                                     </div>
 
                                 </div>
 
                             <% } %>
 
-                            <% if (!hayProgramas) { %>
+                                <% if (!hayCursos) { %>
+                                    <p class="text-secondary mb-0">
+                                        No hay cursos para mostrar.
+                                    </p>
+                                <% } %>
+
+                            <% } else if (esDocente) {
+                                Docente docente = (Docente) usuario;
+                                boolean hayEdiciones = false;
+
+                                for (EdicionCurso edicion : docente.getEdiciones()) {
+                                    if (edicion == null) {
+                                        continue;
+                                    }
+
+                                    hayEdiciones = true;
+                            %>
+
+                                <div class="perfil-elemento">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                                        <div>
+                                            <h3 class="h6 mb-2">
+                                                <%= edicion.getNombre() %>
+                                            </h3>
+
+                                            <% if (edicion.getCurso() != null) { %>
+                                                <p class="text-secondary mb-0">
+                                                    Curso: <%= edicion.getCurso().getNombre() %>
+                                                </p>
+                                            <% } %>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="<%= request.getContextPath() %>/SvltConsultarCurso?nombre=<%= URLEncoder.encode(edicion.getCurso().getNombre(), "UTF-8") %>&amp;edicion=<%= URLEncoder.encode(edicion.getNombre(), "UTF-8") %>"
+                                               class="btn btn-outline-primary btn-sm">
+                                                Consultar edición
+                                                <i class="bi bi-arrow-right ms-1"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                    
+                            <% } %>
+
+                                <% if (!hayEdiciones) { %>
+                                    <p class="text-secondary mb-0">
+                                        No hay ediciones de cursos para mostrar.
+                                    </p>
+                                <% } %>
+
+                            <% } else { %>
+
                                 <p class="text-secondary mb-0">
-                                    No hay programas de formación para mostrar.
+                                    No hay cursos asociados a este usuario.
                                 </p>
+
                             <% } %>
 
                         </section>
 
-                    <% } %>
+                        <!-- PROGRAMAS: solamente para estudiantes -->
+                        <% if (esEstudiante) {
+                            Estudiante estudiante = (Estudiante) usuario;
+                        %>
+
+                            <section id="programas"
+                                     class="perfil-seccion"
+                                     role="tabpanel">
+
+                                <h2 class="h5 mb-3">Programas de formación</h2>
+
+                                <%
+                                    boolean hayProgramas = false;
+
+                                    for (InscripcionPrograma inscripcion
+                                            : estudiante.getProgramas()) {
+
+                                        EstadoInscripcion estado = inscripcion.getEstado();
+
+                                        boolean mostrar =
+                                                estado == EstadoInscripcion.INSCRIPTO
+                                                || estado == EstadoInscripcion.ACEPTADA
+                                                || (esPropioPerfil
+                                                    && estado == EstadoInscripcion.RECHAZADA);
+
+                                        if (!mostrar) {
+                                            continue;
+                                        }
+
+                                        ProgramaFormacion programa = inscripcion.getPrograma();
+
+                                        if (programa == null) {
+                                            continue;
+                                        }
+
+                                        hayProgramas = true;
+                                %>
+
+                                    <div class="perfil-elemento">
+
+                                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+
+                                            <div>
+                                                <h3 class="h6 mb-2">
+                                                    <%= programa.getNombre() %>
+                                                </h3>
+
+                                                <p class="text-secondary small mb-2">
+                                                    Fecha de inscripción:
+                                                    <%= inscripcion.getFechaIns() != null
+                                                            ? inscripcion.getFechaIns().format(
+                                                                DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                                                            : "No especificada" %>
+                                                </p>
+                                            </div>
+
+                                            <div class="d-flex flex-column align-items-start gap-2">
+
+                                                <span class="perfil-estado <%= estado == EstadoInscripcion.ACEPTADA
+                                                            ? "aceptada"
+                                                            : estado == EstadoInscripcion.RECHAZADA
+                                                                ? "rechazada" : "inscripto" %>">
+                                                    <%= estado %>
+                                                </span>
+
+                                                <a href="<%= request.getContextPath() %>/consultarPrograma?programa=<%= URLEncoder.encode(programa.getNombre(), "UTF-8") %>"
+                                                   class="btn btn-outline-primary btn-sm">
+                                                    Consultar programa
+                                                    <i class="bi bi-arrow-right ms-1"></i>
+                                                </a>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                <% } %>
+
+                                <% if (!hayProgramas) { %>
+                                    <p class="text-secondary mb-0">
+                                        No hay programas de formación para mostrar.
+                                    </p>
+                                <% } %>
+
+                            </section>
+
+                        <% } %>
+
+                    </div>
 
                 </div>
 
-            </div>
+            <% } %>
 
-        <% } %>
-
-    </main>
+        </main>
+    </div>
 
     <script>
         const pestanas = document.querySelectorAll(".perfil-pestana");

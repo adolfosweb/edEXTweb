@@ -21,8 +21,7 @@ public class ControladorInstituto implements IControladorInstituto {
     @Override
     public boolean altaInstituto(Instituto instituto) {
 
-        if (instituto == null || instituto.getNombre() == null
-                || buscarInstituto(instituto.getNombre()) != null) {
+        if (instituto == null || instituto.getNombre() == null || buscarInstituto(instituto.getNombre()) != null) {
             return false;
         }
 

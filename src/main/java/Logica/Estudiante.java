@@ -22,7 +22,7 @@ public class Estudiante extends Usuario implements Serializable {
 
     // Inscripciones a programas
     @OneToMany(mappedBy = "estudianteInscripto")
-private List<InscripcionPrograma> inscripcionesProgramas = new ArrayList<>();
+    private List<InscripcionPrograma> inscripcionesProgramas = new ArrayList<>();
 
     public Estudiante() {
         super();
