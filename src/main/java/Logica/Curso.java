@@ -60,6 +60,14 @@ public class Curso implements Serializable {
         inverseJoinColumns = @JoinColumn(name = "previa_nombre")
     )
     private List<Curso> previas = new ArrayList<>();
+    
+    @ManyToMany
+    @JoinTable(
+        name = "curso_categoria",
+        joinColumns = @JoinColumn(name = "curso_id"),
+        inverseJoinColumns = @JoinColumn(name = "categoria_nombre")
+    )
+    private List<Categoria> categorias = new ArrayList<>();
 
     // =========================================================================
     // CONSTRUCTORES
@@ -128,7 +136,11 @@ public class Curso implements Serializable {
     public List<Curso> getPrevias() {
         return previas;
     }
-
+    
+    public List<Categoria> getCategorias() {
+    return categorias;
+    }
+    
     // =========================================================================
     // SETTERS
     // =========================================================================
@@ -176,6 +188,10 @@ public class Curso implements Serializable {
     public void setPrevias(List<Curso> previas) {
         this.previas = previas;
     }
+    
+    public void setCategorias(List<Categoria> categorias){
+        this.categorias = categorias;
+    }
 
     // =========================================================================
     // MÉTODOS DE NEGOCIO / HELPER
@@ -222,6 +238,16 @@ public class Curso implements Serializable {
         if (c != null) {
             previas.remove(c);
         }
+    }
+
+    public void agregarCategoria(Categoria c) {
+        if (c != null && !categorias.contains(c)) {
+            categorias.add(c);
+        }
+    }
+
+    public void eliminarCategoria(Categoria c) {
+        categorias.remove(c);
     }
 
     // =========================================================================

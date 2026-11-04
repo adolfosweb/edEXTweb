@@ -5,6 +5,7 @@ import Logica.Curso;
 import Logica.Docente;
 import Logica.Instituto;
 import Logica.Usuario;
+import Logica.Categoria;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -49,6 +50,7 @@ public class AltaCurso extends HttpServlet {
             }
             cursoFormulario = crearDtCurso(existente);
             request.setAttribute("previasSeleccionadas", nombresPrevias(existente));
+            request.setAttribute("categoriasSeleccionadas", nombresCategorias(existente));
         }
 
         prepararFormulario(request, docente, controladorCurso, cursoFormulario, modoEdicion);
@@ -147,12 +149,29 @@ public class AltaCurso extends HttpServlet {
                 }
             }
         }
+        
+        List<Categoria> categoriasSeleccionadas = new ArrayList<>();
+        if (error == null) {
+            String[] nombresCategorias = request.getParameterValues("categorias");
+            if (nombresCategorias != null) {
+                Map<String, Categoria> disponibles = controladorCurso.listarCategorias();
+                for (String nombreCategoria : nombresCategorias) {
+                    Categoria categoria = disponibles.get(nombreCategoria);
+                    if (categoria == null) {
+                        error = "Una de las categorías seleccionadas ya no existe.";
+                        break;
+                    }
+                    categoriasSeleccionadas.add(categoria);
+                }
+            }
+        }
 
         if (error != null) {
             request.setAttribute("error", error);
             DtCurso cursoFormulario = crearDtCurso(nombre, descripcion, duracion, cantHoras, cantCreditos,
                     url, institutoNombre);
             request.setAttribute("previasSeleccionadas", request.getParameterValues("previas"));
+            request.setAttribute("categoriasSeleccionadas",request.getParameterValues("categorias"));
             prepararFormulario(request, docente, controladorCurso, cursoFormulario, modoEdicion);
             request.setAttribute("fechaRegistro", modoEdicion && cursoExistente != null
                     && cursoExistente.getFecRegistro() != null
@@ -169,6 +188,7 @@ public class AltaCurso extends HttpServlet {
                         : java.sql.Date.valueOf(fechaRegistro), url);
         curso.setInstituto(new Instituto(institutoNombre));
         curso.setPrevias(previas);
+        curso.setCategorias(categoriasSeleccionadas);
 
         boolean guardado = modoEdicion
                 ? controladorCurso.modificarCurso(curso)
@@ -178,6 +198,7 @@ public class AltaCurso extends HttpServlet {
                     ? "No se pudo modificar el curso. Revisa los datos e inténtalo nuevamente."
                     : "No se pudo dar de alta el curso. Revisa los datos e inténtalo nuevamente.");
             request.setAttribute("previasSeleccionadas", request.getParameterValues("previas"));
+            request.setAttribute("categoriasSeleccionadas",request.getParameterValues("categorias"));
             prepararFormulario(request, docente, controladorCurso,
                     crearDtCurso(nombre, descripcion, duracion, cantHoras, cantCreditos, url, institutoNombre),
                     modoEdicion);
@@ -232,7 +253,14 @@ public class AltaCurso extends HttpServlet {
                 }
             }
         }
+        
+        List<String> categorias = new ArrayList<>();
+        Map<String, Categoria> categoriasDisponibles = controladorCurso.listarCategorias();
+        if (categoriasDisponibles != null) {
+            categorias.addAll(categoriasDisponibles.keySet());
+        }
 
+        request.setAttribute("categorias", categorias);
         request.setAttribute("institutos", institutos);
         request.setAttribute("cursosExistentes", cursosExistentes);
         request.setAttribute("cursoFormulario", cursoFormulario);
@@ -292,5 +320,15 @@ public class AltaCurso extends HttpServlet {
             return "Completa todos los campos obligatorios.";
         }
         return null;
+    }
+    
+    private List<String> nombresCategorias(Curso curso) {
+        List<String> nombres = new ArrayList<>();
+
+        for (Categoria categoria : curso.getCategorias()) {
+            nombres.add(categoria.getNombre());
+        }
+
+        return nombres;
     }
 }

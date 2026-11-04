@@ -3,7 +3,17 @@
     Created on : Sep 25, 2026, 5:34:32?PM
     Author     : adolfo
 --%>
-
+<style>
+    .foto-header {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        object-fit: cover;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+</style>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
     <div class="container-fluid px-4">
         <!-- Nombre de la plataforma -->
@@ -73,18 +83,19 @@
                             }
                         }
                     %>
-
-                    <% if (urlFoto != null) { %>
-                        <img src="<%= urlFoto %>"
-                             alt="Foto de perfil de <%= usuario.getNickname() %>"
-                             class="avatar-sm rounded-circle">
-                    <% } else { %>
-                        <div class="avatar-sm d-flex align-items-center justify-content-center
-                                    rounded-circle bg-secondary text-white"
-                             title="Sin foto de perfil">
-                            <i class="bi bi-person-fill"></i>
-                        </div>
-                    <% } %>
+                    <a href="<%= request.getContextPath() %>/PerfilUsuarioServlet?nickname=<%= java.net.URLEncoder.encode(usuario.getNickname(), "UTF-8") %>">
+                        <% if (urlFoto != null) { %>
+                            <img src="<%= urlFoto %>"
+                                 alt="Foto de perfil de <%= usuario.getNickname() %>"
+                                 class="avatar-sm rounded-circle foto-header">
+                        <% } else { %>
+                            <div class="avatar-sm d-flex align-items-center justify-content-center
+                                        rounded-circle bg-secondary text-white foto-header"
+                                 title="Sin foto de perfil">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        <% } %>
+                    </a>
 
 
             <% } else { %>

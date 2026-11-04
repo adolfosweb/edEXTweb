@@ -32,6 +32,8 @@ public interface IControladorCurso {
 
     Map<String, EdicionCurso> listarEdiciones();
     
+    Map<String, Categoria> listarCategorias();
+    
     InscripcionCurso buscarInscripcion(String nickEstudiante, String nombreEdicion);
 
     boolean inscribirEstudiante(InscripcionCurso inscripcion);

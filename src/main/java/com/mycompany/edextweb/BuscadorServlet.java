@@ -19,9 +19,7 @@ public class BuscadorServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        System.out.println(">>> ENTRO AL BuscadorServlet");
-        
+
         String query = request.getParameter("q");
         String filtro = request.getParameter("filtro");
         String orden = request.getParameter("orden");

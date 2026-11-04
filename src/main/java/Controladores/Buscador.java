@@ -89,7 +89,8 @@ public class Buscador {
                 } else {
                     consultaUsuarios = em.createQuery(
                         "SELECT u FROM Usuario u "
-                        + "WHERE LOWER(u.nickname) LIKE :texto",
+                        + "WHERE LOWER(u.nickname) LIKE :texto "
+                        + "OR LOWER(u.nombre) LIKE :texto",
                         Usuario.class
                     );
                     consultaUsuarios.setParameter("texto", coincidencia);

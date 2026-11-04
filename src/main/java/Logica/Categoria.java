@@ -2,7 +2,10 @@ package Logica;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Categoria implements Serializable {
@@ -11,13 +14,30 @@ public class Categoria implements Serializable {
     
     @Id
     private String nombre;
+    
+    @ManyToMany(mappedBy = "categorias")
+    private List<Curso> cursos = new ArrayList<>();
 
     public String getNombre() {
         return nombre;
     }
 
-    public void setId(String nombre) {
+    public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+    
+    public List<Curso> getCursos() {
+        return cursos;
+    }
+    
+    public void agregarCurso(Curso c){
+        if (c != null && !cursos.contains(c)) {
+            cursos.add(c);
+        }
+    }
+    
+    public void eliminarCurso(Curso c){
+        cursos.remove(c);
     }
 
     @Override

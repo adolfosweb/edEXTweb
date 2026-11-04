@@ -91,6 +91,23 @@
                                    }
                                } %>
                         </dd>
+                        <dt class="col-sm-4">Categorías</dt>
+                        <dd class="col-sm-8">
+                            <%
+                                List<String> categorias = curso.getCategorias();
+                                if (categorias == null || categorias.isEmpty()) {
+                            %>
+                                Sin categorías asociadas.
+                            <% } else { %>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <% for (String categoria : categorias) { %>
+                                        <span class="badge text-bg-secondary">
+                                            <%= escapeHtml(categoria) %>
+                                        </span>
+                                    <% } %>
+                                </div>
+                            <% } %>
+                        </dd>
                     </dl>
                 </div>
             </div>

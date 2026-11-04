@@ -6,6 +6,8 @@
     List<String> institutos = (List<String>) request.getAttribute("institutos");
     List<String> cursosExistentes = (List<String>) request.getAttribute("cursosExistentes");
     Object previasSeleccionadas = request.getAttribute("previasSeleccionadas");
+    List<String> categorias = (List<String>) request.getAttribute("categorias");
+    Object categoriasSeleccionadas = request.getAttribute("categoriasSeleccionadas");
     boolean modoEdicion = Boolean.TRUE.equals(request.getAttribute("modoEdicion"));
     boolean mostrarExito = Boolean.TRUE.equals(request.getAttribute("mostrarExito"));
     if (curso == null) {
@@ -117,6 +119,33 @@
                                     </select>
                                     <% if (institutos == null || institutos.isEmpty()) { %>
                                     <div class="form-text text-danger">Tu cuenta docente no tiene institutos asociados.</div>
+                                    <% } %>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label">Categorías del curso</label>
+                                    <% if (categorias != null && !categorias.isEmpty()) { %>
+                                        <div class="border rounded p-3">
+                                            <% for (String categoria : categorias) { %>
+                                                <div class="form-check">
+                                                    <input class="form-check-input"
+                                                           type="checkbox"
+                                                           name="categorias"
+                                                           id="categoria_<%= java.net.URLEncoder.encode(categoria, "UTF-8") %>"
+                                                           value="<%= escapeHtml(categoria) %>"
+                                                           <%= estaSeleccionado(categoriasSeleccionadas, categoria) ? "checked" : "" %>>
+                                                    <label class="form-check-label"
+                                                           for="categoria_<%= java.net.URLEncoder.encode(categoria, "UTF-8") %>">
+                                                        <%= escapeHtml(categoria) %>
+                                                    </label>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        <div class="form-text">Podés seleccionar una o varias categorías.</div>
+                                    <% } else { %>
+                                        <div class="text-danger small">
+                                            No hay categorías disponibles.
+                                        </div>
                                     <% } %>
                                 </div>
 

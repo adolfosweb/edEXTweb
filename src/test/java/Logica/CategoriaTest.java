@@ -15,17 +15,17 @@ public class CategoriaTest {
     void setIdYGetNombre() {
         Categoria categoria = new Categoria();
 
-        categoria.setId("Programacion");
+        categoria.setNombre("Programacion");
         assertEquals("Programacion", categoria.getNombre());
     }
 
     @Test
     void categoriasConElMismoNombreSonIguales() {
         Categoria categoria1 = new Categoria();
-        categoria1.setId("Programacion");
+        categoria1.setNombre("Programacion");
 
         Categoria categoria2 = new Categoria();
-        categoria2.setId("Programacion");
+        categoria2.setNombre("Programacion");
 
         assertEquals(categoria1, categoria2);
         assertEquals(categoria1.hashCode(), categoria2.hashCode());
@@ -34,10 +34,10 @@ public class CategoriaTest {
     @Test
     void categoriasConNombresDiferentesNoSonIguales() {
         Categoria categoria1 = new Categoria();
-        categoria1.setId("Programacion");
+        categoria1.setNombre("Programacion");
 
         Categoria categoria2 = new Categoria();
-        categoria2.setId("Matematica");
+        categoria2.setNombre("Matematica");
 
         assertNotEquals(categoria1, categoria2);
     }
@@ -55,7 +55,7 @@ public class CategoriaTest {
     @Test
     void categoriaNoEsIgualAOtroTipoDeObjeto() {
         Categoria categoria = new Categoria();
-        categoria.setId("Programacion");
+        categoria.setNombre("Programacion");
 
         assertNotEquals(categoria, "Programacion");
         assertNotEquals(categoria, null);
@@ -64,7 +64,7 @@ public class CategoriaTest {
     @Test
     void toStringIncluyeElNombre() {
         Categoria categoria = new Categoria();
-        categoria.setId("Programacion");
+        categoria.setNombre("Programacion");
         
         assertEquals("Logica.Categoria[ id=Programacion ]",categoria.toString());
     }

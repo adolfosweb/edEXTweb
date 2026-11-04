@@ -12,17 +12,6 @@
     request.setAttribute("institutosMenu", institutosMenu);
 %>
 <aside class="bg-dark border-end p-1" style="width: 250px; min-height: calc(100vh - 70px);">
-    <% 
-    if (usuario != null) 
-    { %>
-    <hr class="border border-light border-1 opacity-100">
-    <div>
-        <ul class="list-unstyled">
-            <li class="mb-1"><a href="<%= request.getContextPath() %>/PerfilUsuarioServlet?nickname=<%= java.net.URLEncoder.encode(usuario.getNickname(), "UTF-8") %>" 
-                                class="text-uppercase text-secondary fw-bold text-white text-decoration-none">Mi Perfil</a></li>
-        </ul>
-    </div>
-    <% } %>
     <hr class="border border-light border-1 opacity-100">
     <%
     if(usuario instanceof Estudiante){

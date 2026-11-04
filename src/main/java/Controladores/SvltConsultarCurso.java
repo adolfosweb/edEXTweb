@@ -3,6 +3,7 @@ package Controladores;
 import Datatypes.DtCurso;
 import Datatypes.DtEdicionCurso;
 import Datatypes.DtProgramaFormacion;
+import Logica.Categoria;
 import Logica.Docente;
 import Logica.EdicionCurso;
 import Logica.Estudiante;
@@ -48,6 +49,12 @@ public class SvltConsultarCurso extends HttpServlet {
             }
 
             Curso curso = cursos.get(0);
+            em.createQuery(
+                "SELECT DISTINCT c FROM Curso c "
+                + "LEFT JOIN FETCH c.categorias "
+                + "WHERE c.nombre = :nombre", Curso.class)
+                .setParameter("nombre", nombre)
+                .getSingleResult();
             DtCurso dtCurso = new DtCurso();
             dtCurso.setNombre(curso.getNombre());
             dtCurso.setDescripcion(curso.getDescripcion());
@@ -63,6 +70,12 @@ public class SvltConsultarCurso extends HttpServlet {
                 nombresPrevias.add(previa.getNombre());
             }
             dtCurso.setPrevias(nombresPrevias);
+            
+            List<String> nombresCategorias = new ArrayList<>();
+            for (Categoria categoria : curso.getCategorias()) {
+                nombresCategorias.add(categoria.getNombre());
+            }
+            dtCurso.setCategorias(nombresCategorias);
 
             List<DtEdicionCurso> ediciones = new ArrayList<>();
             List<EdicionCurso> edicionesEntidad = em.createQuery(

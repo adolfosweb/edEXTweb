@@ -11,6 +11,8 @@ import jakarta.persistence.EntityTransaction;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+
 
 public class ControladorCurso implements IControladorCurso {
 
@@ -25,19 +27,27 @@ public class ControladorCurso implements IControladorCurso {
 
         EntityManager em = Conexion.getInstancia().getEntityManager();
         EntityTransaction tx = em.getTransaction();
-
         try {
             tx.begin();
-            // Re-asociar el Instituto al contexto de persistencia si viene desconectado (detached)
             if (curso.getInstituto() != null) {
-                Instituto inst = em.find(Instituto.class, curso.getInstituto().getNombre());
-                curso.setInstituto(inst);
+                Instituto instituto = em.find(Instituto.class,curso.getInstituto().getNombre());
+                curso.setInstituto(instituto);
             }
-                em.persist(curso);
+
+            List<Categoria> categorias = new ArrayList<>();
+            for (Categoria categoria : curso.getCategorias()) {
+                Categoria gestionada = em.find(Categoria.class,categoria.getNombre());
+                if (gestionada != null) {
+                    categorias.add(gestionada);
+                }
+            }
+
+            curso.setCategorias(categorias);
+            em.persist(curso);
             tx.commit();
             return true;
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) {
+            if (tx.isActive()) {
                 tx.rollback();
             }
             e.printStackTrace();
@@ -53,15 +63,31 @@ public class ControladorCurso implements IControladorCurso {
         if (nombre == null || nombre.trim().isEmpty()) {
             return null;
         }
-        
+
         EntityManager em = Conexion.getInstancia().getEntityManager();
         try {
-            // Se realiza JOIN FETCH para cargar las previas antes de cerrar el em
-            String jpql = "SELECT DISTINCT c FROM Curso c LEFT JOIN FETCH c.previas WHERE c.nombre = :nombre";
-            List<Curso> resultados = em.createQuery(jpql, Curso.class)
-                                       .setParameter("nombre", nombre)
-                                       .getResultList();
-            return resultados.isEmpty() ? null : resultados.get(0);
+            // Cargar el curso y sus previas.
+            String jpql = """
+                SELECT DISTINCT c
+                FROM Curso c
+                LEFT JOIN FETCH c.previas
+                WHERE c.nombre = :nombre
+            """;
+
+            List<Curso> resultados = em.createQuery(jpql, Curso.class).setParameter("nombre", nombre).getResultList();
+            if (resultados.isEmpty()) {
+                return null;
+            }
+            Curso curso = resultados.get(0);
+
+            // Cargar las categorías del curso.
+            em.createQuery("""
+                SELECT DISTINCT c
+                FROM Curso c
+                LEFT JOIN FETCH c.categorias
+                WHERE c.nombre = :nombre
+            """, Curso.class).setParameter("nombre", nombre).getSingleResult();
+            return curso;
         } finally {
             em.close();
         }
@@ -82,20 +108,66 @@ public class ControladorCurso implements IControladorCurso {
 
     @Override
     public boolean modificarCurso(Curso curso) {
-        if (curso == null || curso.getNombre() == null || buscarCurso(curso.getNombre()) == null) {
+        if (curso == null || curso.getNombre() == null) {
             return false;
         }
-
+        
         EntityManager em = Conexion.getInstancia().getEntityManager();
         EntityTransaction tx = em.getTransaction();
-
         try {
             tx.begin();
-            em.merge(curso); // Modifica la entidad en la base de datos
+
+            // Recuperamos la entidad que ya está administrada por JPA.
+            Curso existente = em.find(Curso.class, curso.getNombre());
+            if (existente == null) {
+                tx.rollback();
+                return false;
+            }
+
+            // Actualizamos los atributos simples.
+            existente.setDescripcion(curso.getDescripcion());
+            existente.setDuracion(curso.getDuracion());
+            existente.setCantHoras(curso.getCantHoras());
+            existente.setCantCreditos(curso.getCantCreditos());
+            existente.setFecRegistro(curso.getFecRegistro());
+            existente.setUrl(curso.getUrl());
+
+            // Actualizamos el instituto.
+            if (curso.getInstituto() != null) {
+                Instituto instituto = em.find(Instituto.class,curso.getInstituto().getNombre());
+                if (instituto == null) {
+                    tx.rollback();
+                    return false;
+                }
+                existente.setInstituto(instituto);
+            } else {
+                tx.rollback();
+                return false;
+            }
+
+            // Recuperamos las previas dentro del contexto de persistencia.
+            List<Curso> previas = new ArrayList<>();
+            for (Curso previa : curso.getPrevias()) {
+                Curso previaGestionada = em.find(Curso.class,previa.getNombre());
+                if (previaGestionada != null) {
+                    previas.add(previaGestionada);
+                }
+            }
+            existente.setPrevias(previas);
+
+            // Recuperamos las categorías dentro del contexto de persistencia.
+            List<Categoria> categorias = new ArrayList<>();
+            for (Categoria categoria : curso.getCategorias()) {
+                Categoria categoriaGestionada = em.find(Categoria.class,categoria.getNombre());
+                if (categoriaGestionada != null) {
+                    categorias.add(categoriaGestionada);
+                }
+            }
+            existente.setCategorias(categorias);
             tx.commit();
             return true;
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) {
+            if (tx.isActive()) {
                 tx.rollback();
             }
             e.printStackTrace();
@@ -224,6 +296,24 @@ public class ControladorCurso implements IControladorCurso {
         }
     }
     
+    @Override
+    public Map<String, Categoria> listarCategorias() {
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        try {
+            List<Categoria> lista = em.createQuery(
+                "SELECT c FROM Categoria c ORDER BY c.nombre",
+                Categoria.class
+            ).getResultList();
+
+            Map<String, Categoria> mapa = new HashMap<>();
+            for (Categoria categoria : lista) {
+                mapa.put(categoria.getNombre(), categoria);
+            }
+            return mapa;
+        } finally {
+            em.close();
+        }
+    }
     
     @Override
     public InscripcionCurso buscarInscripcion(String nickEstudiante, String nombreEdicion) {
