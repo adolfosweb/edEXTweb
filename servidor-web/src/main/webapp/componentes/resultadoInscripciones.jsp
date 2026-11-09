@@ -1,9 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="java.util.List"%>
-<%@page import="Logica.InscripcionCurso"%>
-<%@page import="Logica.EdicionCurso"%>
-<%@page import="Logica.Curso"%>
-<%@page import="Logica.EstadoInscripcion"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -24,71 +20,98 @@
                         <i class="bi bi-card-checklist me-2"></i>
                         Resultados de inscripciones
                     </h2>
-                    <p class="text-muted mb-4">Consulta el estado de tus inscripciones a ediciones de cursos. </p>
-                    <%
-                        List<InscripcionCurso> inscripciones =
-                            (List<InscripcionCurso>) request.getAttribute("inscripciones");
-                    %>
-                    <% if (inscripciones == null || inscripciones.isEmpty()) { %>
-                        <div class="alert alert-info mb-0">
-                            Todavía no tienes inscripciones a ediciones de cursos.
+                    <p class="text-muted mb-4">
+                        Consulta el estado de tus inscripciones a ediciones de cursos.
+                    </p>
+                    <c:if test="${not empty mensajeError}">
+                        <div class="alert alert-danger" role="alert">
+                            <c:out value="${mensajeError}"/>
                         </div>
-                    <% } else { %>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Curso</th>
-                                        <th>Edición</th>
-                                        <th>Fecha de inscripción</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% for (InscripcionCurso inscripcion : inscripciones) {
-                                        EdicionCurso edicion = inscripcion.getCurso();
-                                        Curso curso = edicion != null ? edicion.getCurso() : null;
-
-                                        EstadoInscripcion estado = inscripcion.getEstado();
-
-                                        String claseEstado = "secondary";
-                                        String textoEstado = "Sin estado";
-
-                                        if (estado != null) {
-                                            textoEstado = estado.toString();
-                                            switch (estado) {
-                                                case INSCRIPTO:
-                                                    claseEstado = "primary";
-                                                    break;
-                                                case ACEPTADA:
-                                                    claseEstado = "success";
-                                                    break;
-                                                case RECHAZADA:
-                                                    claseEstado = "danger";
-                                                    break;
-                                            }
-                                        }
-                                    %>
+                    </c:if>
+                    <c:choose>
+                        <c:when test="${not empty inscripciones}">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
                                         <tr>
-                                            <td>
-                                                <%= curso != null ? curso.getNombre() : "Curso no disponible" %>
-                                            </td>
-                                            <td>
-                                                <%= edicion != null ? edicion.getNombre() : "Edición no disponible" %>
-                                            </td>
-                                            <td>
-                                                <%= inscripcion.getFechaIns() != null ? inscripcion.getFechaIns() : "No disponible" %>
-                                            </td>
-                                            <td>
-                                                <span class="badge text-bg-<%= claseEstado %>"><%= textoEstado %></span>
-                                            </td>
+                                            <th>Curso</th>
+                                            <th>Edición</th>
+                                            <th>Fecha de inscripción</th>
+                                            <th>Estado</th>
                                         </tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
-                    <% } %>
-                    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="inscripcion" items="${inscripciones}">
+                                            <tr>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${not empty inscripcion.nombreCurso}">
+                                                            <c:out value="${inscripcion.nombreCurso}"/>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            Curso no disponible
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${not empty inscripcion.nombreEdicion}">
+                                                            <c:out value="${inscripcion.nombreEdicion}"/>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            Edición no disponible
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${not empty inscripcion.fechaInscripcion}">
+                                                            <c:out value="${inscripcion.fechaInscripcion}"/>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            No disponible
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${inscripcion.estado == 'INSCRIPTO'}">
+                                                            <span class="badge text-bg-primary">
+                                                                INSCRIPTO
+                                                            </span>
+                                                        </c:when>
+                                                        <c:when test="${inscripcion.estado == 'ACEPTADA'}">
+                                                            <span class="badge text-bg-success">
+                                                                ACEPTADA
+                                                            </span>
+                                                        </c:when>
+                                                        <c:when test="${inscripcion.estado == 'RECHAZADA'}">
+                                                            <span class="badge text-bg-danger">
+                                                                RECHAZADA
+                                                            </span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="badge text-bg-secondary">
+                                                                <c:out value="${not empty inscripcion.estado ? inscripcion.estado : 'Sin estado'}"/>
+                                                            </span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="alert alert-info mb-0">
+                                Todavía no tienes inscripciones a ediciones de cursos.
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                    <button type="button"
+                            class="btn btn-outline-secondary mt-3"
+                            onclick="history.back()">
                         <i class="bi bi-arrow-left me-1"></i>
                         Volver
                     </button>

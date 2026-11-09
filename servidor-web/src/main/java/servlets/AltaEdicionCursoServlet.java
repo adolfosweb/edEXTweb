@@ -1,373 +1,210 @@
 package servlets;
 
-import Controladores.Conexion;
-import Controladores.ControladorCurso;
-import Controladores.ControladorUsuario;
-import Logica.Curso;
-import Logica.Docente;
-import Logica.EdicionCurso;
-import Logica.Instituto;
-import Logica.Usuario;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
+import WebServices.ClienteSOAP;
+import com.mycompany.edextweb.soap.CursoEdicionFormularioDTO;
+import com.mycompany.edextweb.soap.ResultadoOperacionDTO;
+import com.mycompany.edextweb.soap.UsuarioDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.xml.ws.WebServiceException;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @WebServlet(name = "SvltAltaEdicionCurso", urlPatterns = {"/SvltAltaEdicionCurso"})
 public class AltaEdicionCursoServlet extends HttpServlet {
 
+    private static final String JSP = "/componentes/cursos/altaEdicionCurso.jsp";
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        Docente docenteSesion = obtenerDocente(request, response);
-        if (docenteSesion == null) {
+    protected void doGet(HttpServletRequest request,HttpServletResponse response)throws ServletException, IOException {
+
+        UsuarioDTO docente = obtenerDocente(request, response);
+        if (docente == null) {
             return;
         }
 
         String nombreCurso = limpiar(request.getParameter("curso"));
-        Curso curso = buscarCurso(nombreCurso);
-        if (curso == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No se encontró el curso.");
-            return;
-        }
-        if (!docentePuedeGestionarCurso(docenteSesion, curso)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "No puedes crear ediciones para cursos de este instituto.");
-            return;
-        }
-
         boolean modoEdicion = "editar".equals(request.getParameter("modo"));
-        EdicionCurso edicion = null;
-        if (modoEdicion) {
-            edicion = buscarEdicion(limpiar(request.getParameter("edicion")));
-            if (edicion == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No se encontró la edición.");
-                return;
-            }
-            if (edicion.getCurso() == null || !nombreCurso.equals(edicion.getCurso().getNombre())) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                        "La edición no pertenece al curso seleccionado.");
-                return;
-            }
-        }
+        String nombreEdicion = limpiar(request.getParameter("edicion"));
 
-        prepararFormulario(request, curso, docenteSesion, edicion, modoEdicion, null);
-        request.getRequestDispatcher("/componentes/cursos/altaEdicionCurso.jsp").forward(request, response);
+        try {
+            CursoEdicionFormularioDTO formulario =
+                    ClienteSOAP.obtenerServicio()
+                            .obtenerFormularioAltaEdicionCurso(
+                                    docente.getNickname(),
+                                    nombreCurso,
+                                    modoEdicion,
+                                    nombreEdicion);
+            if (formulario == null || !formulario.isCursoEncontrado()) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                        "No se encontró el curso.");
+                return;
+            }
+            if (!formulario.isAutorizado()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                        "No puedes gestionar ediciones de este curso.");
+                return;
+            }
+            if (modoEdicion && !formulario.isEdicionEncontrada()) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                        "No se encontró la edición o no pertenece al curso.");
+                return;
+            }
+
+            prepararAtributos(request, formulario);
+            request.getRequestDispatcher(JSP).forward(request, response);
+        } catch (WebServiceException ex) {
+            getServletContext().log("Error al cargar el formulario de edición de curso.", ex);
+
+            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                    "No se pudo conectar con el servidor central.");
+        }
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        Docente docenteSesion = obtenerDocente(request, response);
-        if (docenteSesion == null) {
+        UsuarioDTO docente = obtenerDocente(request, response);
+        if (docente == null) {
             return;
         }
-
+        
         String nombreCurso = limpiar(request.getParameter("curso"));
         String nombreEdicion = limpiar(request.getParameter("nombre"));
-        String inicioTexto = limpiar(request.getParameter("fechaInicio"));
-        String finTexto = limpiar(request.getParameter("fechaFin"));
-        String cupoTexto = limpiar(request.getParameter("cupo"));
+        String inicio = limpiar(request.getParameter("fechaInicio"));
+        String fin = limpiar(request.getParameter("fechaFin"));
+        String cupo = limpiar(request.getParameter("cupo"));
+        String edicionOriginal = limpiar(request.getParameter("edicionOriginal"));
+
         boolean modoEdicion = "editar".equals(request.getParameter("modo"));
 
-        Curso curso = buscarCurso(nombreCurso);
-        if (curso == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No se encontró el curso.");
-            return;
-        }
-        if (!docentePuedeGestionarCurso(docenteSesion, curso)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "No puedes crear ediciones para cursos de este instituto.");
-            return;
-        }
+        String[] docentesArray = request.getParameterValues("docentes");
+        Set<String> docentes = docentesArray == null
+                ? new LinkedHashSet<>()
+                : new LinkedHashSet<>(java.util.Arrays.asList(docentesArray));
 
-        EdicionCurso edicionExistente = null;
-        if (modoEdicion) {
-            edicionExistente = buscarEdicion(limpiar(request.getParameter("edicionOriginal")));
-            if (edicionExistente == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No se encontró la edición.");
+        String error = null;
+        try {
+            ResultadoOperacionDTO resultado =
+                    ClienteSOAP.obtenerServicio().guardarEdicionCurso(
+                            docente.getNickname(),
+                            nombreCurso,
+                            nombreEdicion,
+                            inicio,
+                            fin,
+                            cupo,
+                            modoEdicion,
+                            edicionOriginal,
+                            new ArrayList<>(docentes));
+
+            if (resultado == null) {
+                error = "El servidor central no devolvió un resultado.";
+            } else if (!resultado.isExitoso()) {
+                error = resultado.getMensaje();
+            }
+        } catch (WebServiceException ex) {
+            getServletContext().log("Error al guardar la edición mediante SOAP.", ex);
+
+            error = "No se pudo conectar con el servidor central.";
+        }
+        if (error == null) {
+            response.sendRedirect(request.getContextPath()
+                    + "/SvltConsultarCurso?nombre="
+                    + URLEncoder.encode(nombreCurso, StandardCharsets.UTF_8));
+            return;
+        }
+        // Recuperar los datos de referencia del formulario.
+        try {
+            CursoEdicionFormularioDTO formulario =
+                    ClienteSOAP.obtenerServicio()
+                            .obtenerFormularioAltaEdicionCurso(
+                                    docente.getNickname(),
+                                    nombreCurso,
+                                    modoEdicion,
+                                    edicionOriginal);
+
+            if (formulario == null || !formulario.isCursoEncontrado()) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                        "No se encontró el curso.");
                 return;
             }
-            if (edicionExistente.getCurso() == null
-                    || !nombreCurso.equals(edicionExistente.getCurso().getNombre())) {
+
+            if (!formulario.isAutorizado()) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                        "La edición no pertenece al curso seleccionado.");
+                        "No puedes gestionar ediciones de este curso.");
                 return;
             }
-            if (!edicionExistente.getNombre().equals(nombreEdicion)) {
-                request.setAttribute("error", "El nombre de una edición existente no se puede cambiar.");
+
+            if (modoEdicion && !formulario.isEdicionEncontrada()) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                        "No se encontró la edición.");
+                return;
             }
-        }
 
-        String error = (String) request.getAttribute("error");
-        if (error == null && (nombreEdicion == null || nombreEdicion.isEmpty()
-                || inicioTexto == null || inicioTexto.isEmpty()
-                || finTexto == null || finTexto.isEmpty())) {
-            error = "Completa el nombre y las fechas de inicio y fin.";
-        }
+            prepararAtributos(request, formulario);
 
-        LocalDate fechaInicio = null;
-        LocalDate fechaFin = null;
-        if (error == null) {
-            try {
-                fechaInicio = LocalDate.parse(inicioTexto);
-                fechaFin = LocalDate.parse(finTexto);
-                if (!modoEdicion && fechaInicio.isBefore(LocalDate.now())) {
-                    error = "La fecha de inicio no puede ser anterior a hoy.";
-                } else if (!fechaFin.isAfter(fechaInicio)) {
-                    error = "La fecha de fin debe ser posterior a la fecha de inicio.";
-                }
-            } catch (DateTimeParseException ex) {
-                error = "Ingresa fechas válidas.";
-            }
-        }
-
-        int cupo = 0;
-        if (error == null && cupoTexto != null && !cupoTexto.isEmpty()) {
-            try {
-                cupo = Integer.parseInt(cupoTexto);
-                if (cupo < 0) {
-                    error = "El cupo debe ser cero o un número positivo.";
-                }
-            } catch (NumberFormatException ex) {
-                error = "El cupo debe ser un número entero.";
-            }
-        }
-
-        Set<String> nombresDocentes = new LinkedHashSet<>();
-        String[] docentesEnFormulario = request.getParameterValues("docentes");
-        if (docentesEnFormulario != null) {
-            for (String nickname : docentesEnFormulario) {
-                if (nickname != null && !nickname.trim().isEmpty()) {
-                    nombresDocentes.add(nickname.trim());
-                }
-            }
-        }
-        if (error == null && nombresDocentes.isEmpty()) {
-            error = "Selecciona al menos un docente participante.";
-        }
-
-        Map<String, Usuario> usuarios = new ControladorUsuario().listarUsuarios();
-        List<Docente> docentesSeleccionados = new ArrayList<>();
-        if (error == null) {
-            for (String nickname : nombresDocentes) {
-                Usuario usuario = usuarios.get(nickname);
-                if (!(usuario instanceof Docente)) {
-                    error = "Uno de los participantes seleccionados no es un docente válido.";
-                    break;
-                }
-                docentesSeleccionados.add((Docente) usuario);
-            }
-        }
-
-        EdicionCurso edicionConNombre = error == null
-                ? buscarEdicion(nombreEdicion) : null;
-        if (error == null && edicionConNombre != null
-                && (!modoEdicion || !edicionConNombre.getNombre().equals(edicionExistente.getNombre()))) {
-            error = "Ya existe una edición con ese nombre.";
-            boolean mismaCurso = edicionConNombre.getCurso() != null
-                    && nombreCurso.equals(edicionConNombre.getCurso().getNombre());
-            request.setAttribute("edicionDuplicada", mismaCurso);
-            request.setAttribute("nombreEdicionDuplicada", edicionConNombre.getNombre());
-        }
-
-        if (error != null) {
+            // Conservar los valores ingresados.
+            request.setAttribute("nombreEdicion", nombreEdicion);
+            request.setAttribute("fechaInicio", inicio);
+            request.setAttribute("fechaFin", fin);
+            request.setAttribute("cupo", cupo);
+            request.setAttribute("edicionOriginal", edicionOriginal);
             request.setAttribute("error", error);
-            prepararFormulario(request, curso, docenteSesion, null, modoEdicion, nombresDocentes);
-            request.setAttribute("nombreEdicion", nombreEdicion);
-            request.setAttribute("fechaInicio", inicioTexto);
-            request.setAttribute("fechaFin", finTexto);
-            request.setAttribute("cupo", cupoTexto);
-            request.setAttribute("edicionOriginal",
-                    modoEdicion ? request.getParameter("edicionOriginal") : null);
-            request.setAttribute("edicionDuplicada",
-                    Boolean.TRUE.equals(request.getAttribute("edicionDuplicada")));
-            request.getRequestDispatcher("/componentes/cursos/altaEdicionCurso.jsp").forward(request, response);
-            return;
-        }
+            request.setAttribute("docentesSeleccionados", docentes);
 
-        boolean guardada;
-        if (modoEdicion) {
-            guardada = modificarEdicion(edicionExistente.getNombre(), fechaInicio, fechaFin, cupo,
-                    docentesSeleccionados);
-        } else {
-            EdicionCurso nuevaEdicion = new EdicionCurso(nombreEdicion, fechaInicio, fechaFin, cupo,
-                    LocalDate.now(), curso, docentesSeleccionados.get(0));
-            for (int i = 1; i < docentesSeleccionados.size(); i++) {
-                nuevaEdicion.getDocentes().add(docentesSeleccionados.get(i));
-            }
-            guardada = new ControladorCurso().altaEdicion(nuevaEdicion);
-        }
+            request.getRequestDispatcher(JSP).forward(request, response);
 
-        if (!guardada) {
-            request.setAttribute("error", "No se pudo guardar la edición. Revisa los datos e inténtalo nuevamente.");
-            prepararFormulario(request, curso, docenteSesion, null, modoEdicion, nombresDocentes);
-            request.setAttribute("nombreEdicion", nombreEdicion);
-            request.setAttribute("fechaInicio", inicioTexto);
-            request.setAttribute("fechaFin", finTexto);
-            request.setAttribute("cupo", cupoTexto);
-            request.setAttribute("edicionOriginal",
-                    modoEdicion ? request.getParameter("edicionOriginal") : null);
-            request.getRequestDispatcher("/componentes/cursos/altaEdicionCurso.jsp").forward(request, response);
-            return;
+        } catch (WebServiceException ex) {
+            getServletContext().log("Error al recuperar el formulario después de un fallo.", ex);
+            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                    "No se pudo recuperar el formulario desde el servidor central.");
         }
-
-        response.sendRedirect(request.getContextPath() + "/SvltConsultarCurso?nombre="
-                + java.net.URLEncoder.encode(nombreCurso, "UTF-8"));
     }
 
-    private Docente obtenerDocente(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void prepararAtributos(HttpServletRequest request,CursoEdicionFormularioDTO formulario) {
+
+        request.setAttribute("curso", formulario.getNombreCurso());
+        request.setAttribute("docentes", formulario.getDocente());
+        request.setAttribute("docentesSeleccionados",new LinkedHashSet<>(formulario.getDocenteSeleccionado()));
+        request.setAttribute("modoEdicion", formulario.isModoEdicion());
+
+        if (formulario.isModoEdicion()) {
+            request.setAttribute("nombreEdicion",formulario.getNombreEdicion());
+            request.setAttribute("fechaInicio",formulario.getFechaInicio());
+            request.setAttribute("fechaFin",formulario.getFechaFin());
+            request.setAttribute("cupo", formulario.getCupo());
+            request.setAttribute("edicionOriginal",formulario.getNombreEdicion());
+        }
+    }
+
+    private UsuarioDTO obtenerDocente(HttpServletRequest request,HttpServletResponse response) throws IOException {
+
         HttpSession sesion = request.getSession(false);
-        if (sesion == null || !(sesion.getAttribute("usuario") instanceof Usuario usuarioSesion)) {
+        if (sesion == null || sesion.getAttribute("usuario") == null) {
             response.sendRedirect(request.getContextPath() + "/componentes/login.jsp");
             return null;
         }
-        Usuario usuario = new ControladorUsuario().buscarUsuario(usuarioSesion.getNickname());
-        if (!(usuario instanceof Docente docente)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "Solo un docente puede gestionar ediciones de cursos.");
+
+        Object objeto = sesion.getAttribute("usuario");
+        if (!(objeto instanceof UsuarioDTO usuario)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"Solo un docente puede gestionar ediciones de cursos.");
             return null;
         }
-        return docente;
-    }
-
-    private Curso buscarCurso(String nombre) {
-        if (nombre == null || nombre.isEmpty()) {
+        if (!"DOCENTE".equals(usuario.getTipoUsuario())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"Solo un docente puede gestionar ediciones de cursos.");
             return null;
         }
-        EntityManager em = Conexion.getInstancia().getEntityManager();
-        try {
-            List<Curso> cursos = em.createQuery(
-                    "SELECT c FROM Curso c LEFT JOIN FETCH c.instituto WHERE c.nombre = :nombre",
-                    Curso.class)
-                    .setParameter("nombre", nombre)
-                    .getResultList();
-            return cursos.isEmpty() ? null : cursos.get(0);
-        } finally {
-            em.close();
-        }
+        return usuario;
     }
-
-    private EdicionCurso buscarEdicion(String nombre) {
-        if (nombre == null || nombre.isEmpty()) {
-            return null;
-        }
-        EntityManager em = Conexion.getInstancia().getEntityManager();
-        try {
-            List<EdicionCurso> ediciones = em.createQuery(
-                    "SELECT DISTINCT e FROM EdicionCurso e "
-                    + "LEFT JOIN FETCH e.curso "
-                    + "LEFT JOIN FETCH e.docentes "
-                    + "WHERE e.nombre = :nombre",
-                    EdicionCurso.class)
-                    .setParameter("nombre", nombre)
-                    .getResultList();
-            return ediciones.isEmpty() ? null : ediciones.get(0);
-        } finally {
-            em.close();
-        }
-    }
-
-    private boolean modificarEdicion(String nombre, LocalDate inicio, LocalDate fin, int cupo,
-            List<Docente> docentesSeleccionados) {
-        EntityManager em = Conexion.getInstancia().getEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            EdicionCurso edicion = em.createQuery(
-                    "SELECT DISTINCT e FROM EdicionCurso e "
-                    + "LEFT JOIN FETCH e.curso "
-                    + "LEFT JOIN FETCH e.docentes "
-                    + "WHERE e.nombre = :nombre",
-                    EdicionCurso.class)
-                    .setParameter("nombre", nombre)
-                    .getSingleResult();
-            edicion.setFechaInicio(inicio);
-            edicion.setFechaFin(fin);
-            edicion.setCupo(cupo);
-            edicion.getDocentes().clear();
-            for (Docente docente : docentesSeleccionados) {
-                Docente docenteGestionado = em.find(Docente.class, docente.getNickname());
-                if (docenteGestionado == null) {
-                    tx.rollback();
-                    return false;
-                }
-                edicion.getDocentes().add(docenteGestionado);
-            }
-            tx.commit();
-            return true;
-        } catch (Exception ex) {
-            if (tx.isActive()) {
-                tx.rollback();
-            }
-            getServletContext().log("No se pudo modificar la edición de curso " + nombre, ex);
-            return false;
-        } finally {
-            em.close();
-        }
-    }
-
-    private boolean docentePuedeGestionarCurso(Docente docente, Curso curso) {
-        if (curso.getInstituto() == null) {
-            return false;
-        }
-        String nombreInstitutoCurso = curso.getInstituto().getNombre();
-        for (Instituto instituto : docente.getInstitutos()) {
-            if (nombreInstitutoCurso.equals(instituto.getNombre())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void prepararFormulario(HttpServletRequest request, Curso curso, Docente docente,
-            EdicionCurso edicion, boolean modoEdicion, Set<String> docentesSeleccionados) {
-        Map<String, Usuario> usuarios = new ControladorUsuario().listarUsuarios();
-        List<String> docentes = new ArrayList<>();
-        for (Usuario usuario : usuarios.values()) {
-            if (usuario instanceof Docente) {
-                docentes.add(usuario.getNickname());
-            }
-        }
-
-        if (docentesSeleccionados == null) {
-            docentesSeleccionados = new LinkedHashSet<>();
-            if (edicion != null) {
-                for (Docente participante : edicion.getDocentes()) {
-                    docentesSeleccionados.add(participante.getNickname());
-                }
-            } else {
-                docentesSeleccionados.add(docente.getNickname());
-            }
-        }
-
-        request.setAttribute("curso", curso.getNombre());
-        request.setAttribute("docentes", docentes);
-        request.setAttribute("docentesSeleccionados", docentesSeleccionados);
-        request.setAttribute("modoEdicion", modoEdicion);
-        if (edicion != null) {
-            request.setAttribute("nombreEdicion", edicion.getNombre());
-            request.setAttribute("fechaInicio", edicion.getFechaInicio());
-            request.setAttribute("fechaFin", edicion.getFechaFin());
-            request.setAttribute("cupo", edicion.getCupo() == 0 ? "" : edicion.getCupo());
-            request.setAttribute("edicionOriginal", edicion.getNombre());
-        }
-    }
-
     private String limpiar(String valor) {
         return valor == null ? null : valor.trim();
     }

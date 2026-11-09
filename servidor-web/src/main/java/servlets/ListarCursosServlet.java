@@ -1,76 +1,57 @@
-package com.mycompany.edextweb;
+package servlets;
 
-import Controladores.ControladorCurso;
-import Controladores.ControladorUsuario;
-import Controladores.IControladorCurso;
-import Datatypes.DtCurso;
-import Logica.Curso;
-import Logica.Docente;
-import Logica.Instituto;
-import Logica.Usuario;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import WebServices.ClienteSOAP;
+import com.mycompany.edextweb.soap.EdextWebService;
+import com.mycompany.edextweb.soap.ListadoCursosDTO;
+import com.mycompany.edextweb.soap.UsuarioDTO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.xml.ws.WebServiceException;
+
+import java.io.IOException;
+import java.util.Collections;
 
 @WebServlet(name = "SvltListarCursos", urlPatterns = {"/SvltListarCursos"})
 public class ListarCursosServlet extends HttpServlet {
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        
-        // Obtenemos el controlador (instanciación directa para este ejemplo)
-        IControladorCurso controladorCurso = new ControladorCurso();
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
 
-        // El controlador existente devuelve Map<String, Curso>
-        Map<String, Curso> cursosMap = controladorCurso.listarCursos();
-        
-        // Convertimos a una lista de DtCurso (Data Types)
-        List<DtCurso> listaDtCursos = new ArrayList<>();
-        Set<String> cursosEditables = new HashSet<>();
-        Usuario usuarioSesion = request.getSession(false) == null
-                ? null : (Usuario) request.getSession(false).getAttribute("usuario");
-        Docente docente = usuarioSesion instanceof Docente
-                ? (Docente) new ControladorUsuario().buscarUsuario(usuarioSesion.getNickname()) : null;
-        
-        if (cursosMap != null) {
-            for (Curso c : cursosMap.values()) {
-                DtCurso dt = new DtCurso();
-                dt.setNombre(c.getNombre());
-                dt.setDescripcion(c.getDescripcion());
-                dt.setDuracion(c.getDuracion());
-                dt.setCantHoras(c.getCantHoras());
-                dt.setCantCreditos(c.getCantCreditos());
-                dt.setUrl(c.getUrl());
-                if (c.getInstituto() != null) {
-                    String nombreInstituto = c.getInstituto().getNombre();
-                    dt.setInstituto(nombreInstituto);
-                    if (docente != null && docente.getInstitutos().stream()
-                            .map(Instituto::getNombre)
-                            .anyMatch(nombreInstituto::equals)) {
-                        cursosEditables.add(c.getNombre());
-                    }
+        try {
+            String nickname = null;
+            HttpSession sesion = request.getSession(false);
+            if (sesion != null) {
+                Object usuario = sesion.getAttribute("usuario");
+
+                if (usuario instanceof UsuarioDTO usuarioDTO) {
+                    nickname = usuarioDTO.getNickname();
                 }
-                listaDtCursos.add(dt);
             }
+
+            EdextWebService servicio = ClienteSOAP.obtenerServicio();
+            ListadoCursosDTO listado = servicio.listarCursosParaWeb(nickname);
+            if (listado != null) {
+                request.setAttribute("cursos", listado.getCursos());
+                request.setAttribute("cursosEditables", listado.getCursosEditables());
+            } else {
+                request.setAttribute("cursos", Collections.emptyList());
+                request.setAttribute("cursosEditables", Collections.emptyList());
+            }
+        } catch (WebServiceException e) {
+            request.setAttribute("cursos", Collections.emptyList());
+            request.setAttribute("cursosEditables", Collections.emptyList());
+            request.setAttribute("mensajeError","No se pudo conectar con el servidor central. Intente nuevamente.");
         }
 
-        // Enviamos la lista de Dt a la vista
-        request.setAttribute("cursos", listaDtCursos);
-        request.setAttribute("cursosEditables", cursosEditables);
         request.getRequestDispatcher("/componentes/cursos/listarCursos.jsp").forward(request, response);
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
         processRequest(request, response);
     }
 

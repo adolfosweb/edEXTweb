@@ -11,12 +11,14 @@ public class ResultadoBusqueda {
     private LocalDate fecha;
     private String imagen;
 
-    public ResultadoBusqueda(String tipo, String id, String nombre, String descripcion, LocalDate fecha, String imagen) {
+    public ResultadoBusqueda(String tipo, String id, String nombre,
+            String descripcion, LocalDate fecha, String imagen) {
         this.tipo = tipo;
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.fecha = fecha;
+        this.imagen = imagen;
     }
 
     public String getTipo() {

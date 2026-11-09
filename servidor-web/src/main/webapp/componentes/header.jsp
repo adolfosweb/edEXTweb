@@ -38,7 +38,7 @@
         </form>
         <!-- Usuario -->
         <%
-            Logica.Usuario usuario = (Logica.Usuario) session.getAttribute("usuario");
+            com.mycompany.edextweb.soap.UsuarioDTO usuario = (com.mycompany.edextweb.soap.UsuarioDTO) session.getAttribute("usuario");
         %>
 
         <div class="d-flex align-items-center gap-3">

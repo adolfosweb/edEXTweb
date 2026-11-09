@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Agregar Curso A Programa - edExt</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Curso A Programa - edExt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light">
     <jsp:include page="header.jsp" />
@@ -22,36 +22,64 @@
                             <i class="bi bi-journal-plus me-2 text-primary"></i>
                             Agregar curso a programa
                         </h2>
-                        <p class="text-secondary mb-0">Seleccione programa de formación y el curso a agregar.</p>
+                        <p class="text-secondary mb-0">
+                            Seleccione programa de formación y el curso a agregar.
+                        </p>
                     </div>
                     <!-- Selección -->
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-4">
-                            <form action="${pageContext.request.contextPath}/agregarCursoAPrograma" method="POST">
+                            <form action="${pageContext.request.contextPath}/agregarCursoAPrograma"
+                                  method="POST">
                                 <!-- Mensaje de error -->
                                 <c:if test="${not empty error}">
                                     <div class="alert alert-danger" role="alert">
                                         <c:out value="${error}"/>
                                     </div>
                                 </c:if>
+                                <c:if test="${not empty errorCarga}">
+                                    <div class="alert alert-danger" role="alert">
+                                        <c:out value="${errorCarga}"/>
+                                    </div>
+                                </c:if>
                                 <!-- Programa -->
                                 <div class="mb-4">
-                                    <label for="programa" class="form-label fw-semibold">Programa de formación</label>
-                                    <select id="programa"name="programa"class="form-select"required>
-                                        <option value="" selected disabled>Seleccione un programa</option>
+                                    <label for="programa" class="form-label fw-semibold">
+                                        Programa de formación
+                                    </label>
+                                    <select id="programa"
+                                            name="programa"
+                                            class="form-select"
+                                            required>
+                                        <option value="" disabled
+                                            ${empty param.programa ? 'selected' : ''}>
+                                            Seleccione un programa
+                                        </option>
                                         <c:forEach var="p" items="${programas}">
-                                            <option value="<c:out value='${p.key}'/>"><c:out value="${p.key}"/></option>
+                                            <option value="${p.nombre}"
+                                                ${param.programa eq p.nombre ? 'selected' : ''}>
+                                                <c:out value="${p.nombre}"/>
+                                            </option>
                                         </c:forEach>
                                     </select>
                                 </div>
                                 <!-- Curso -->
                                 <div class="mb-4">
-                                    <label for="curso" class="form-label fw-semibold">Curso</label>
-                                    <select id="curso"name="curso"class="form-select"required>
-                                        <option value="" selected disabled>Seleccione un curso</option>
+                                    <label for="curso" class="form-label fw-semibold">
+                                        Curso
+                                    </label>
+                                    <select id="curso"
+                                            name="curso"
+                                            class="form-select"
+                                            required>
+                                        <option value="" disabled
+                                            ${empty param.curso ? 'selected' : ''}>
+                                            Seleccione un curso
+                                        </option>
                                         <c:forEach var="c" items="${cursos}">
-                                            <option value="<c:out value='${c.key}'/>">
-                                                <c:out value="${c.key}"/>
+                                            <option value="${c.nombre}"
+                                                ${param.curso eq c.nombre ? 'selected' : ''}>
+                                                <c:out value="${c.nombre}"/>
                                             </option>
                                         </c:forEach>
                                     </select>
@@ -65,7 +93,9 @@
                                         <i class="bi bi-x-lg me-1"></i>
                                         Cancelar
                                     </button>
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="submit"
+                                            class="btn btn-primary"
+                                            ${empty programas or empty cursos ? 'disabled' : ''}>
                                         <i class="bi bi-plus-lg me-1"></i>
                                         Agregar curso
                                     </button>

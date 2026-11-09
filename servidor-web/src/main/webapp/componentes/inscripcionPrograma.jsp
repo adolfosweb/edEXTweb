@@ -5,8 +5,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Inscripcion Programa - edExt</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"rel="stylesheet">
-    <link rel="stylesheet"href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
         .programa-img {
             width: 100%;
@@ -19,10 +19,10 @@
             object-fit: cover;
         }
         .cursos-scroll {
-        display: flex;
-        gap: 1rem;
-        overflow-x: auto;
-        padding-bottom: 10px;
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-bottom: 10px;
         }
         .cursos-scroll > * {
             flex: 0 0 calc((100% - 2rem) / 3);
@@ -45,7 +45,11 @@
                     <c:out value="${error}"/>
                 </div>
             </c:if>
-            <!-- 1. Seleccionar programa -->
+            <c:if test="${not empty errorCarga}">
+                <div class="alert alert-danger" role="alert">
+                    <c:out value="${errorCarga}"/>
+                </div>
+            </c:if>
             <section class="mb-4">
                 <h3 class="h4 mb-3">
                     <i class="bi bi-journal-bookmark me-2"></i>
@@ -53,39 +57,57 @@
                 </h3>
                 <div class="cursos-scroll g-3">
                     <c:forEach var="p" items="${programas}">
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card h-100 shadow-sm">
-                            <c:choose>
-                                    <c:when test="${not empty p.value.imagen}">
-                                        <img src="${pageContext.request.contextPath}${p.value.imagen}"
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card h-100 shadow-sm">
+                                <c:choose>
+                                    <c:when test="${not empty p.imagen}">
+                                        <img src="${pageContext.request.contextPath}${p.imagen}"
                                              class="card-img-top"
                                              alt="Portada del programa"
                                              style="height: 200px; object-fit: cover;">
                                     </c:when>
-
                                     <c:otherwise>
                                         <img src="https://placehold.co/600x300/e2e8f0/334155?text=Programa"
                                              class="card-img-top"
                                              alt="Programa sin imagen">
                                     </c:otherwise>
                                 </c:choose>
-                            <div class="card-body">
-                                <h4 class="h5 card-title"><c:out value="${p.value.nombre}"/></h4>
-                                <p class="card-text text-secondary"><c:out value="${p.value.descripcion}"/></p>
-                                <form action="${pageContext.request.contextPath}/inscripcionPrograma" method="post">
-                                    <input type="hidden" name="programa" value="${p.key}">
-                                    <button type="submit" class="btn btn-outline-primary btn-sm">
-                                        Inscribirse
+                                <div class="card-body">
+                                    <h4 class="h5 card-title">
+                                        <c:out value="${p.nombre}"/>
+                                    </h4>
+                                    <p class="card-text text-secondary">
+                                        <c:out value="${p.descripcion}"/>
+                                    </p>
+                                    <form action="${pageContext.request.contextPath}/inscripcionPrograma"
+                                          method="post">
+                                        <input type="hidden"
+                                               name="programa"
+                                               value="<c:out value='${p.nombre}'/>">
+                                        <button type="submit"
+                                                class="btn btn-outline-primary btn-sm">
+                                            Inscribirse
+                                            <i class="bi bi-arrow-right ms-1"></i>
+                                        </button>
+                                    </form>
+                                    <c:url var="urlPrograma" value="/consultarPrograma">
+                                        <c:param name="programa" value="${p.nombre}"/>
+                                    </c:url>
+                                    <a href="${urlPrograma}"
+                                       class="btn btn-outline-primary btn-sm">
+                                        Información
                                         <i class="bi bi-arrow-right ms-1"></i>
-                                    </button>
-                                </form>                                
-                                <a href="${pageContext.request.contextPath}/consultarPrograma?programa=${p.key}"
-                                    class="btn btn-outline-primary btn-sm">Información<i class="bi bi-arrow-right ms-1"></i></a>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    </c:forEach>  
+                    </c:forEach>
                 </div>
+                <c:if test="${empty programas and empty errorCarga}">
+                    <p class="text-secondary">
+                        No hay programas disponibles.
+                    </p>
+                </c:if>
             </section>
         </main>
     </div>

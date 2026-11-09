@@ -284,11 +284,15 @@ public class ControladorCurso implements IControladorCurso {
     public Map<String, EdicionCurso> listarEdiciones() {
         EntityManager em = Conexion.getInstancia().getEntityManager();
         try {
-            List<EdicionCurso> lista = em.createQuery("SELECT e FROM EdicionCurso e", EdicionCurso.class).getResultList();
-            
+            List<EdicionCurso> lista = em.createQuery(
+                "SELECT DISTINCT e FROM EdicionCurso e "
+                + "LEFT JOIN FETCH e.curso c "
+                + "LEFT JOIN FETCH c.instituto",
+                EdicionCurso.class
+            ).getResultList();
             Map<String, EdicionCurso> mapaEdiciones = new HashMap<>();
-            for (EdicionCurso e : lista) {
-                mapaEdiciones.put(e.getNombre(), e);
+            for (EdicionCurso edicion : lista) {
+                mapaEdiciones.put(edicion.getNombre(), edicion);
             }
             return mapaEdiciones;
         } finally {

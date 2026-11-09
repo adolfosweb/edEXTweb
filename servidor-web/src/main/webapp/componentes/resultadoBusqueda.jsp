@@ -125,14 +125,13 @@
                         para «<c:out value="${busquedaActual}"/>»
                     </c:if>
                 </p>
-
                 <form action="${pageContext.request.contextPath}/buscador" method="GET"
                       class="d-flex align-items-center gap-2">
                     <input type="hidden" name="q" value="<c:out value='${busquedaActual}'/>">
                     <input type="hidden" name="filtro" value="<c:out value='${filtroActual}'/>">
-
+                    
                     <label for="orden" class="form-label mb-0 text-nowrap">Ordenar por:</label>
-
+                    
                     <select class="form-select form-select-sm" id="orden" name="orden" onchange="this.form.submit()">
                         <option value="nombre_asc" ${ordenActual == 'nombre_asc' ? 'selected' : ''}>Nombre (A-Z)</option>
                         <option value="fecha_desc" ${ordenActual == 'fecha_desc' ? 'selected' : ''}>Más recientes</option>
@@ -140,38 +139,40 @@
                 </form>
             </div>
             <hr class="mb-4">
+            <!-- Mensaje de error de conexión -->
+            <c:if test="${not empty mensajeError}">
+                <div class="alert alert-danger" role="alert">
+                    <c:out value="${mensajeError}"/>
+                </div>
+            </c:if>
             <!-- Tarjetas de resultados -->
             <c:choose>
                 <c:when test="${not empty resultados}">
                     <div class="row g-4">
                         <c:forEach var="r" items="${resultados}">
-                            <div class="col-12 col-md-6 col-xl-4">                              
+                            <div class="col-12 col-md-6 col-xl-4">
                                 <article class="card resultado-card shadow-sm h-100">
-                                    <%-- Imagen o placeholder según el tipo de resultado --%>
+                                    <!-- Imagen o placeholder según el tipo de resultado -->
                                     <div class="resultado-imagen">
-                                        <c:choose>
-                                            <%-- Cursos: placeholder temporal --%>
+                                        <c:choose>                                            
                                             <c:when test="${r.tipo == 'curso'}">
                                                 <div class="placeholder-imagen placeholder-curso">
                                                     <i class="bi bi-journal-bookmark"></i>
                                                     <span>Imagen del curso</span>
                                                 </div>
-                                            </c:when>
-                                            <%-- Programas: mostrar su imagen si existe --%>
+                                            </c:when>                                          
                                             <c:when test="${r.tipo == 'programa' and not empty r.imagen}">
                                                 <img src="<c:out value='${r.imagen}'/>"
                                                      alt="Imagen de <c:out value='${r.nombre}'/>"
                                                      class="img-fluid"
                                                      loading="lazy">
-                                            </c:when>
-                                            <%-- Usuarios: avatar provisional --%>
+                                            </c:when>                                           
                                             <c:when test="${r.tipo == 'usuario' and not empty r.imagen}">
                                                 <img src="<c:out value='${r.imagen}'/>"
                                                      alt="Imagen de perfil de <c:out value='${r.nombre}'/>"
                                                      class="img-fluid"
                                                      loading="lazy">
-                                            </c:when>
-                                            <%-- Fallback para programas y usuarios sin imagen --%>
+                                            </c:when>                                            
                                             <c:otherwise>
                                                 <div class="placeholder-imagen placeholder-generico">
                                                     <i class="${r.tipo == 'usuario' ? 'bi bi-person-circle' : 'bi bi-image'}"></i>
@@ -205,7 +206,9 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
-                                        <h3 class="h5 card-title"><c:out value="${r.nombre}"/></h3>
+                                        <h3 class="h5 card-title">
+                                            <c:out value="${r.nombre}"/>
+                                        </h3>
                                         <p class="card-text text-secondary resultado-descripcion">
                                             <c:choose>
                                                 <c:when test="${not empty r.descripcion}">
@@ -226,8 +229,10 @@
                                         <div class="mt-auto pt-3">
                                             <c:choose>
                                                 <c:when test="${r.tipo == 'programa'}">
-                                                    <a class="btn btn-outline-primary btn-sm"
-                                                       href="${pageContext.request.contextPath}/consultarPrograma?programa=${r.id}">
+                                                    <c:url var="urlPrograma" value="/consultarPrograma">
+                                                        <c:param name="programa" value="${r.id}"/>
+                                                    </c:url>
+                                                    <a class="btn btn-outline-primary btn-sm" href="${urlPrograma}">
                                                         Consultar programa
                                                         <i class="bi bi-arrow-right ms-1"></i>
                                                     </a>
@@ -280,6 +285,6 @@
             </c:choose>
         </main>
     </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

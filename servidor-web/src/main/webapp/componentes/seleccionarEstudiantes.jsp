@@ -6,8 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Seleccionar estudiantes</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"  rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -19,15 +18,22 @@
                 <i class="bi bi-person-check me-2"></i>
                 Seleccionar estudiantes
             </h2>
-            <p class="text-muted mb-4">Consulta las inscripciones y gestiona la selección de estudiantes.</p>
+            <p class="text-muted mb-4">
+                Consulta las inscripciones y gestiona la selección de estudiantes.
+            </p>
             <c:if test="${not empty mensajeSeleccion}">
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle me-2"></i>
                     <c:out value="${mensajeSeleccion}" />
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="alert" aria-label="Cerrar"></button>
                 </div>
             </c:if>
-            <!-- Paso 1: seleccionar instituto -->
+            <c:if test="${not empty mensajeError}">
+                <div class="alert alert-danger" role="alert">
+                    <c:out value="${mensajeError}" />
+                </div>
+            </c:if>
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Seleccionar instituto</h5>
@@ -36,18 +42,18 @@
                             <c:url var="urlInstituto" value="/seleccionarEstudiantes">
                                 <c:param name="instituto" value="${instituto.nombre}" />
                             </c:url>
-                            <a href="${urlInstituto}" class="list-group-item list-group-item-action
+                            <a href="${urlInstituto}"
+                               class="list-group-item list-group-item-action
                                ${institutoSeleccionado eq instituto.nombre ? 'active' : ''}">
-                                ${instituto.nombre}
+                                <c:out value="${instituto.nombre}" />
                             </a>
                         </c:forEach>
                     </div>
                     <c:if test="${empty institutos}">
-                        <p class="text-muted mb-0"> No tienes institutos asociados.</p>
+                        <p class="text-muted mb-0">No tienes institutos asociados.</p>
                     </c:if>
                 </div>
             </div>
-            <!-- Paso 2: seleccionar curso -->
             <c:if test="${not empty institutoSeleccionado}">
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
@@ -60,21 +66,23 @@
                                             <c:param name="instituto" value="${institutoSeleccionado}" />
                                             <c:param name="curso" value="${curso.nombre}" />
                                         </c:url>
-                                        <a href="${urlCurso}" class="list-group-item list-group-item-action
+                                        <a href="${urlCurso}"
+                                           class="list-group-item list-group-item-action
                                            ${cursoSeleccionado eq curso.nombre ? 'active' : ''}">
-                                            ${curso.nombre}
+                                            <c:out value="${curso.nombre}" />
                                         </a>
                                     </c:forEach>
                                 </div>
                             </c:when>
                             <c:otherwise>
-                                <p class="text-muted mb-0">No hay cursos disponibles para este instituto.</p>
+                                <p class="text-muted mb-0">
+                                    No hay cursos disponibles para este instituto.
+                                </p>
                             </c:otherwise>
                         </c:choose>
                     </div>
                 </div>
             </c:if>
-            <!-- Paso 3: seleccionar edición -->
             <c:if test="${not empty cursoSeleccionado}">
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
@@ -88,23 +96,29 @@
                                             <c:param name="curso" value="${cursoSeleccionado}" />
                                             <c:param name="edicion" value="${edicion.nombre}" />
                                         </c:url>
-                                        <a href="${urlEdicion}" class="list-group-item list-group-item-action
+                                        <a href="${urlEdicion}"
+                                           class="list-group-item list-group-item-action
                                            ${edicionSeleccionada eq edicion.nombre ? 'active' : ''}">
-                                            <strong>${edicion.nombre}</strong>
-                                            <span class="ms-2">Inicio: ${edicion.fechaInicio}</span>
-                                            <span class="ms-2">Cupo: ${edicion.cupo}</span>
+                                            <strong><c:out value="${edicion.nombre}" /></strong>
+                                            <span class="ms-2">
+                                                Inicio: <c:out value="${edicion.fechaInicio}" />
+                                            </span>
+                                            <span class="ms-2">
+                                                Cupo: <c:out value="${edicion.cupo}" />
+                                            </span>
                                         </a>
                                     </c:forEach>
                                 </div>
                             </c:when>
                             <c:otherwise>
-                                <p class="text-muted mb-0">No hay ediciones disponibles para este curso.</p>
+                                <p class="text-muted mb-0">
+                                    No hay ediciones disponibles para este curso.
+                                </p>
                             </c:otherwise>
                         </c:choose>
                     </div>
                 </div>
             </c:if>
-            <!-- Paso 4: consultar inscripciones -->
             <c:if test="${not empty edicionSeleccionada}">
                 <div class="card shadow-sm">
                     <div class="card-body">
@@ -125,13 +139,18 @@
                                             <c:forEach var="inscripcion" items="${inscripciones}">
                                                 <tr>
                                                     <td>
-                                                        ${inscripcion.estudiante.nombre}
-                                                        ${inscripcion.estudiante.apellido}
-                                                        <small class="text-muted d-block">
-                                                            ${inscripcion.estudiante.nickname}
-                                                        </small>
+                                                        <c:if test="${not empty inscripcion.estudiante}">
+                                                            <c:out value="${inscripcion.estudiante.nombre}" />
+                                                            <c:out value="${inscripcion.estudiante.apellido}" />
+
+                                                            <small class="text-muted d-block">
+                                                                <c:out value="${inscripcion.estudiante.nickname}" />
+                                                            </small>
+                                                        </c:if>
                                                     </td>
-                                                    <td>${inscripcion.fechaIns}</td>
+                                                    <td>
+                                                        <c:out value="${inscripcion.fechaInscripcion}" />
+                                                    </td>
                                                     <td>
                                                         <c:choose>
                                                             <c:when test="${inscripcion.estado eq 'ACEPTADA'}">
@@ -146,17 +165,26 @@
                                                         </c:choose>
                                                     </td>
                                                     <td>
-                                                        <form method="post" action="${pageContext.request.contextPath}/seleccionarEstudiantes"
+                                                        <form method="post"
+                                                              action="${pageContext.request.contextPath}/seleccionarEstudiantes"
                                                               class="d-flex flex-wrap gap-2">
-                                                            <input type="hidden" name="instituto" value="<c:out value='${institutoSeleccionado}'/>">
-                                                            <input type="hidden" name="curso" value="<c:out value='${cursoSeleccionado}'/>">
-                                                            <input type="hidden" name="edicion" value="<c:out value='${edicionSeleccionada}'/>">
-                                                            <input type="hidden" name="idInscripcion" value="${inscripcion.id}">
-                                                            <button type="submit" name="estado" value="ACEPTADA" class="btn btn-sm btn-success">
+                                                            <input type="hidden" name="instituto"
+                                                                   value="${institutoSeleccionado}">
+                                                            <input type="hidden" name="curso"
+                                                                   value="${cursoSeleccionado}">
+                                                            <input type="hidden" name="edicion"
+                                                                   value="${edicionSeleccionada}">
+                                                            <input type="hidden" name="idInscripcion"
+                                                                   value="${inscripcion.id}">
+                                                            <button type="submit" name="estado"
+                                                                    value="ACEPTADA"
+                                                                    class="btn btn-sm btn-success">
                                                                 <i class="bi bi-check-lg me-1"></i>
                                                                 Aceptar
                                                             </button>
-                                                            <button type="submit" name="estado" value="RECHAZADA" class="btn btn-sm btn-outline-danger">
+                                                            <button type="submit" name="estado"
+                                                                    value="RECHAZADA"
+                                                                    class="btn btn-sm btn-outline-danger">
                                                                 <i class="bi bi-x-lg me-1"></i>
                                                                 Rechazar
                                                             </button>
@@ -179,6 +207,6 @@
             </c:if>
         </main>
     </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

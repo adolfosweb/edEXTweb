@@ -1,106 +1,81 @@
-package com.mycompany.edextweb;
+package servlets;
 
-import Controladores.ControladorPrograma;
-import Logica.Estudiante;
-import Logica.InscripcionPrograma;
-import Logica.ProgramaFormacion;
-import Logica.Usuario;
+import WebServices.ClienteSOAP;
+import com.mycompany.edextweb.soap.EdextWebService;
+import com.mycompany.edextweb.soap.ProgramaConsultaDTO;
+import com.mycompany.edextweb.soap.ResultadoOperacionDTO;
+import com.mycompany.edextweb.soap.UsuarioDTO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Map;
+import jakarta.xml.ws.WebServiceException;
 
-@WebServlet(name = "InscripcionProgramaServlet", urlPatterns = {"/inscripcionPrograma"})
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
+@WebServlet(name = "InscripcionProgramaServlet",urlPatterns = {"/inscripcionPrograma"})
 public class InscripcionProgramaServlet extends HttpServlet {
 
-    private ControladorPrograma controladorPrograma;
-
     @Override
-    public void init() throws ServletException {
-        controladorPrograma = new ControladorPrograma();
-    }
-
-     // Mostrar los programas disponibles
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doGet(HttpServletRequest request,HttpServletResponse response)throws ServletException, IOException {
         mostrarProgramas(request, response);
     }
 
-    // Procesar una inscripción
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doPost(HttpServletRequest request,HttpServletResponse response)throws ServletException, IOException {
         String contexto = request.getContextPath();
-
-        // 1. Comprobar la sesión
+        // Comprobar que exista una sesión válida.
         HttpSession session = request.getSession(false);
-
-        if (session == null || !(session.getAttribute("usuario") instanceof Usuario)) {
+        if (session == null || !(session.getAttribute("usuario") instanceof UsuarioDTO)) {
             response.sendRedirect(contexto + "/componentes/login.jsp");
             return;
         }
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-
-        // 2. Solo los estudiantes pueden inscribirse
-        if (!(usuario instanceof Estudiante)) {
-            request.setAttribute("error","Solo los estudiantes pueden inscribirse a programas.");
-             mostrarProgramas(request, response);
-            return;
-        }
-        Estudiante estudiante = (Estudiante) usuario;
-
-        // 3. Obtener el programa seleccionado
+        UsuarioDTO usuario = (UsuarioDTO) session.getAttribute("usuario");
+        // Obtener el programa seleccionado.
         String nombrePrograma = request.getParameter("programa");
 
         if (nombrePrograma == null || nombrePrograma.isBlank()) {
-            request.setAttribute("error","No se especificó el programa.");
+            request.setAttribute("error", "No se especificó el programa.");
             mostrarProgramas(request, response);
             return;
         }
 
-        ProgramaFormacion programa = controladorPrograma.buscarPrograma(nombrePrograma);
+        try {
+            EdextWebService servicio = ClienteSOAP.obtenerServicio();
 
-        if (programa == null) {
-            request.setAttribute("error","El programa seleccionado no existe.");
-            mostrarProgramas(request, response);
-            return;
-        }
+            ResultadoOperacionDTO resultado =
+                    servicio.inscribirEstudiantePrograma(
+                            usuario.getNickname(),
+                            nombrePrograma);
 
-        // 4. Comprobar si ya existe una inscripción
-        InscripcionPrograma existente = controladorPrograma.buscarInscripcionPrograma(estudiante.getNickname(),nombrePrograma);
-
-        if (existente != null) {
-            request.setAttribute("error","Ya estás inscrito en este programa.");
-            mostrarProgramas(request, response);
-            return;
-        }
-
-        // 5. Crear y guardar la inscripción
-        InscripcionPrograma inscripcion = new InscripcionPrograma(estudiante,LocalDate.now(),programa);
-
-        boolean resultado = controladorPrograma.inscribirEstudiantePrograma(inscripcion);
-
-        if (resultado) {
-            request.setAttribute("mensaje","Te inscribiste correctamente al programa " + programa.getNombre() + ".");
-        } else {
-            request.setAttribute("error","No se pudo completar la inscripción. " + "Intentá nuevamente.");
+            if (resultado != null && resultado.isExitoso()) {
+                request.setAttribute("mensaje", resultado.getMensaje());
+            } else {
+                request.setAttribute("error",
+                        resultado != null ? resultado.getMensaje() : "No se pudo completar la inscripción.");
+            }
+        } catch (WebServiceException e) {
+            request.setAttribute("error","No se pudo conectar con el servidor central. Intente nuevamente.");
         }
         mostrarProgramas(request, response);
     }
 
-    private void mostrarProgramas(HttpServletRequest request,  HttpServletResponse response)
-            throws ServletException, IOException {
+    private void mostrarProgramas(HttpServletRequest request,HttpServletResponse response)throws ServletException, IOException {
+        try {
+            EdextWebService servicio = ClienteSOAP.obtenerServicio();
+            List<ProgramaConsultaDTO> programas = servicio.listarProgramasConsulta();
+            request.setAttribute("programas",programas != null ? programas : Collections.emptyList());
 
-        Map<String, ProgramaFormacion> programas = controladorPrograma.listarProgramas();
-        request.setAttribute("programas", programas);
+        } catch (WebServiceException e) {
+            request.setAttribute("programas", Collections.emptyList());
+            request.setAttribute("errorCarga","No se pudieron cargar los programas. Intente nuevamente.");
+        }
+
         request.getRequestDispatcher("/componentes/inscripcionPrograma.jsp").forward(request, response);
     }
 }

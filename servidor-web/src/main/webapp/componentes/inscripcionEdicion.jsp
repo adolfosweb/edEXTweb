@@ -5,8 +5,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Inscripcion Edicion - edExt</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"rel="stylesheet">
-    <link rel="stylesheet"href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
         .programa-img {
             width: 100%;
@@ -19,10 +19,10 @@
             object-fit: cover;
         }
         .cursos-scroll {
-        display: flex;
-        gap: 1rem;
-        overflow-x: auto;
-        padding-bottom: 10px;
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-bottom: 10px;
         }
         .cursos-scroll > * {
             flex: 0 0 calc((100% - 2rem) / 3);
@@ -36,36 +36,30 @@
         <main class="container-fluid py-4 px-4 bg-light">
             <h2 class="mb-4 text-dark">Inscribirse a un curso</h2>
             <c:if test="${not empty mensaje}">
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <div class="alert ${exitoso ? 'alert-success' : 'alert-danger'} alert-dismissible fade show" role="alert">
                     <c:out value="${mensaje}"/>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                 </div>
             </c:if>
-            <c:if test="${not empty error}">
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <c:out value="${error}"/>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                </div>
-            </c:if>
-            <!-- 1. Seleccionar programa -->
+            <!-- 1. Seleccionar instituto o categoría -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <label for="tipo" class="form-label fw-semibold">Cursos de: </label>
+
                     <select id="tipo" onchange="mostrarLista()" class="form-select">
                         <option value="">Seleccione</option>
                         <option value="instituto" ${not empty param.instituto ? 'selected' : ''}>Institutos</option>
                         <option value="categoria">Categorias</option>
                     </select>
                     <hr>
-
                     <div id="lista-institutos" style="display: none;">
-                        <form action="${pageContext.request.contextPath}/inscripcionEdicion" method="GET">
+                        <form action="${pageContext.request.contextPath}/InscripcionEdicion" method="GET">
                             <label for="instituto" class="form-label">Instituto</label>
                             <select id="instituto" name="instituto" class="form-select" onchange="this.form.submit()">
                                 <option value="">Seleccione un instituto</option>
                                 <c:forEach var="i" items="${institutos}">
-                                    <option value="${i.key}" ${param.instituto == i.key ? 'selected' : ''}>
-                                        <c:out value="${i.key}"/>
+                                    <option value="${i.nombre}" ${param.instituto == i.nombre ? 'selected' : ''}>
+                                        <c:out value="${i.nombre}"/>
                                     </option>
                                 </c:forEach>
                             </select>
@@ -81,6 +75,7 @@
                     </div>
                 </div>
             </div>
+            <!-- 2. Cursos del instituto -->
             <section class="mb-4">
                 <h3 class="h4 mb-3">
                     <i class="bi bi-journal-bookmark me-2"></i>
@@ -90,28 +85,34 @@
                     <c:when test="${empty institutoSeleccionado}">
                         <p class="text-secondary">Seleccioná un instituto para ver sus cursos.</p>
                     </c:when>
-                    <%-- El instituto no tiene cursos --%>
-                    <c:when test="${empty institutoSeleccionado.cursos}">
-                        <p class="text-secondary">Este instituto todavía no tiene cursos registrados.</p>
+                    <c:when test="${empty cursos}">
+                        <p class="text-secondary">Este instituto todavía no tiene cursos con ediciones registradas.</p>
                     </c:when>
-                    <%-- Mostrar los cursos del instituto seleccionado --%>
                     <c:otherwise>
                         <div class="cursos-scroll g-3">
-                            <c:forEach var="curso" items="${institutoSeleccionado.cursos}">
+                            <c:forEach var="curso" items="${cursos}">
                                 <div class="col-md-6 col-xl-4">
                                     <div class="card h-100 shadow-sm">
                                         <div class="card-body">
-                                            <h4 class="h5 card-title"><c:out value="${curso.nombre}"/></h4>
-                                            <p class="card-text text-secondary"><c:out value="${curso.descripcion}"/></p>
-                                            <p class="small text-secondary">Duración: <c:out value="${curso.duracion}"/></p>
+                                            <h4 class="h5 card-title">
+                                                <c:out value="${curso.nombre}"/>
+                                            </h4>
+                                            <p class="card-text text-secondary">
+                                                <c:out value="${curso.descripcion}"/>
+                                            </p>
+                                            <p class="small text-secondary">
+                                                Duración: <c:out value="${curso.duracion}"/>
+                                            </p>
                                             <div class="mt-3">
                                                 <h5 class="h6">Ediciones disponibles</h5>
                                                 <c:choose>
-                                                    <c:when test="${empty edicionesPorCurso[curso.nombre]}">
-                                                        <p class="small text-secondary">Este curso no tiene ediciones registradas.</p>
+                                                    <c:when test="${empty curso.ediciones}">
+                                                        <p class="small text-secondary">
+                                                            Este curso no tiene ediciones registradas.
+                                                        </p>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <c:forEach var="edicion" items="${edicionesPorCurso[curso.nombre]}">
+                                                        <c:forEach var="edicion" items="${curso.ediciones}">
                                                             <div class="border rounded p-2 mb-2">
                                                                 <div class="fw-semibold">
                                                                     <c:out value="${edicion.nombre}"/>
@@ -121,9 +122,10 @@
                                                                     Fin: <c:out value="${edicion.fechaFin}"/><br>
                                                                     Cupo: <c:out value="${edicion.cupo}"/>
                                                                 </div>
-                                                                <form action="${pageContext.request.contextPath}/inscripcionEdicion" method="POST">
+                                                                <form action="${pageContext.request.contextPath}/InscripcionEdicion" method="POST">
                                                                     <input type="hidden" name="instituto" value="${institutoSeleccionado.nombre}">
                                                                     <input type="hidden" name="edicion" value="${edicion.nombre}">
+
                                                                     <button type="submit" class="btn btn-outline-primary btn-sm">
                                                                         Inscribirse
                                                                         <i class="bi bi-arrow-right ms-1"></i>
@@ -147,16 +149,17 @@
     <script>
         function mostrarLista() {
             var seleccion = document.getElementById("tipo").value;
-            // Ocultar ambas listas al iniciar el cambio
+
             document.getElementById("lista-institutos").style.display = "none";
-            document.getElementById("lista-categorias").style.display = "none";     
-            // Mostrar la lista correspondiente según la selección
+            document.getElementById("lista-categorias").style.display = "none";
+
             if (seleccion === "instituto") {
                 document.getElementById("lista-institutos").style.display = "block";
             } else if (seleccion === "categoria") {
                 document.getElementById("lista-categorias").style.display = "block";
             }
         }
+
         document.addEventListener("DOMContentLoaded", mostrarLista);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>

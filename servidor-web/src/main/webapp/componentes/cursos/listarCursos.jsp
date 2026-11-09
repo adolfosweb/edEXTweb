@@ -1,10 +1,10 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="Datatypes.DtCurso"%>
+<%@page import="com.mycompany.edextweb.soap.CursoListadoDTO"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.Set"%>
 <%
     List<?> cursos = (List<?>) request.getAttribute("cursos");
-    Set<?> cursosEditables = (Set<?>) request.getAttribute("cursosEditables");
+    List<?> cursosEditables = (List<?>) request.getAttribute("cursosEditables");
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -29,11 +29,16 @@
         <jsp:include page="/componentes/menulateral.jsp" />
         <main class="container-fluid bg-light p-4">
             <h1 class="mb-4">Listado de cursos</h1>
+            <% if (request.getAttribute("mensajeError") != null) { %>
+                <div class="alert alert-danger">
+                    <%= escapeHtml((String) request.getAttribute("mensajeError")) %>
+                </div>
+            <% } else { %>
             <div class="row g-4">
                 <% if (cursos != null && !cursos.isEmpty()) {
                     for (Object item : cursos) {
-                        if (item instanceof DtCurso) {
-                            DtCurso curso = (DtCurso) item;
+                        if (item instanceof CursoListadoDTO) {
+                            CursoListadoDTO curso = (CursoListadoDTO) item;
                 %>
                 <div class="col-12 col-md-6 col-xl-4">
                     <article class="card h-100 shadow-sm">
@@ -62,6 +67,7 @@
                 </div>
                 <% } %>
             </div>
+            <% } %>
             <a href="<%= request.getContextPath() %>/componentes/principal.jsp" class="btn btn-secondary mt-4">Volver</a>
         </main>
     </div>

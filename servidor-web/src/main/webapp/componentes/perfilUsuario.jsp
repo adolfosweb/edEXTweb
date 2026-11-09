@@ -1,47 +1,49 @@
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="Logica.Usuario"%>
-<%@page import="Logica.Estudiante"%>
-<%@page import="Logica.Docente"%>
-<%@page import="Logica.InscripcionCurso"%>
-<%@page import="Logica.InscripcionPrograma"%>
-<%@page import="Logica.EdicionCurso"%>
-<%@page import="Logica.EstadoInscripcion"%>
-<%@page import="Logica.ProgramaFormacion"%>
+
+<%@page import="com.mycompany.edextweb.soap.UsuarioDTO"%>
+<%@page import="com.mycompany.edextweb.soap.PerfilUsuarioDTO"%>
+<%@page import="com.mycompany.edextweb.soap.InscripcionCursoDTO"%>
+<%@page import="com.mycompany.edextweb.soap.InscripcionProgramaDTO"%>
+<%@page import="com.mycompany.edextweb.soap.EdicionPerfilDTO"%>
+
+<%@page import="java.time.LocalDate"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
 <%@page import="java.net.URLEncoder"%>
 <%@page import="java.io.File"%>
 <%@page import="java.util.List"%>
-<%@page import="java.util.Map"%>
 
 <%
-    // Usuario cuyo perfil se está consultando
-    Usuario usuario = (Usuario) request.getAttribute("usuario");
+    // Perfil recibido desde PerfilUsuarioServlet
+    PerfilUsuarioDTO perfil = (PerfilUsuarioDTO) request.getAttribute("perfil");
 
-    // Determina si el perfil pertenece al usuario de la sesión
-    boolean esPropioPerfil = Boolean.TRUE.equals(
-            request.getAttribute("esPropioPerfil")
-    );
+    UsuarioDTO usuario = (UsuarioDTO) request.getAttribute("usuario");
 
-    String nickname = usuario != null && usuario.getNickname() != null
-            ? usuario.getNickname() : "";
+    boolean esPropioPerfil = Boolean.TRUE.equals(request.getAttribute("esPropioPerfil"));
 
-    String nombre = usuario != null && usuario.getNombre() != null
-            ? usuario.getNombre() : "";
+    String nickname = usuario != null && usuario.getNickname() != null ? usuario.getNickname() : "";
 
-    String apellido = usuario != null && usuario.getApellido() != null
-            ? usuario.getApellido() : "";
+    String nombre = usuario != null && usuario.getNombre() != null ? usuario.getNombre() : "";
 
-    String correo = usuario != null && usuario.getCorreoElectronico() != null
-            ? usuario.getCorreoElectronico() : "";
+    String apellido = usuario != null && usuario.getApellido() != null ? usuario.getApellido() : "";
+
+    String correo = usuario != null && usuario.getCorreoElectronico() != null ? usuario.getCorreoElectronico() : "";
 
     String fechaNacimiento = "";
 
-    if (usuario != null && usuario.getFecNac() != null) {
-        fechaNacimiento = usuario.getFecNac().format(
-                DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        );
+    if (usuario != null && usuario.getFecNac() != null && !usuario.getFecNac().isEmpty()) {
+
+        try {
+            fechaNacimiento = LocalDate.parse(usuario.getFecNac()).format(
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } catch (Exception e) {
+            fechaNacimiento = usuario.getFecNac();
+        }
     }
+
+    // Tipo de usuario
+    boolean esEstudiante = usuario != null && "ESTUDIANTE".equalsIgnoreCase(usuario.getTipoUsuario());
+
+    boolean esDocente = usuario != null && "DOCENTE".equalsIgnoreCase(usuario.getTipoUsuario());
 
     // Buscar la foto existente en imagenesUsuarios
     String extensionFoto = "";
@@ -51,10 +53,7 @@
         String[] extensiones = {".jpg", ".jpeg", ".png"};
 
         for (String extension : extensiones) {
-            File archivo = new File(
-                    directorioFotos,
-                    nickname + extension
-            );
+            File archivo = new File(directorioFotos,nickname + extension);
 
             if (archivo.isFile()) {
                 extensionFoto = extension;
@@ -68,18 +67,18 @@
     if (!extensionFoto.isEmpty()) {
         urlFoto = request.getContextPath()
                 + "/imagenesUsuarios/"
-                + URLEncoder.encode(nickname, "UTF-8")
-                        .replace("+", "%20")
+                + URLEncoder.encode(nickname, "UTF-8").replace("+", "%20")
                 + extensionFoto;
-    }
-    
-    if (!urlFoto.isEmpty()) {
-    urlFoto += "?v=" + System.currentTimeMillis();
-}
 
-    // Tipo de usuario
-    boolean esEstudiante = usuario instanceof Estudiante;
-    boolean esDocente = usuario instanceof Docente;
+        urlFoto += "?v=" + System.currentTimeMillis();
+    }
+
+    // Colecciones recibidas mediante SOAP
+    List<InscripcionCursoDTO> inscripcionesCursos = perfil != null ? perfil.getInscripcionesCursos() : null;
+
+    List<InscripcionProgramaDTO> inscripcionesProgramas = perfil != null ? perfil.getInscripcionesProgramas() : null;
+
+    List<EdicionPerfilDTO> edicionesDocente = perfil != null ? perfil.getEdicionesDocente() : null;
 %>
 
 <!DOCTYPE html>
@@ -90,8 +89,8 @@
 
     <title>Perfil de Usuario - edExt</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"rel="stylesheet">
-    <link rel="stylesheet"href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <style>
         .perfil-contenedor {
@@ -131,7 +130,6 @@
             margin-bottom: 24px;
         }
 
-        /* Foto de perfil */
         .perfil-foto-boton {
             position: relative;
             display: flex;
@@ -318,11 +316,13 @@
 <body class="bg-light">
 
     <jsp:include page="header.jsp" />
+
     <div class="d-flex">
         <jsp:include page="menulateral.jsp"/>
+
         <main class="container-fluid py-4 px-4">
 
-            <% if (usuario == null) { %>
+            <% if (usuario == null || perfil == null) { %>
 
                 <div class="alert alert-warning">
                     No se encontraron los datos del usuario.
@@ -355,7 +355,7 @@
                         </div>
                     <% } %>
 
-                    <!-- Volver a la lista de usuarios -->
+                    <!-- Volver -->
                     <a href="javascript:history.back()"
                        class="perfil-volver"
                        title="Volver a la lista de usuarios"
@@ -371,52 +371,39 @@
                             <path d="M19 12H5"/>
                             <path d="M12 19l-7-7 7-7"/>
                         </svg>
-
                     </a>
 
-                    <!-- Cabecera del perfil -->
+                    <!-- Cabecera -->
                     <div class="perfil-cabecera">
 
                         <% if (esPropioPerfil) { %>
 
-                            <!-- La foto del propio usuario permite cambiarla -->
                             <a href="<%= request.getContextPath() %>/ModificarImagenPerfilServlet?nickname=<%= URLEncoder.encode(nickname, "UTF-8") %>"
                                class="perfil-foto-boton"
                                title="Cambiar foto de perfil"
                                aria-label="Cambiar foto de perfil">
 
                                 <% if (!urlFoto.isEmpty()) { %>
-
                                     <img src="<%= urlFoto %>"
                                          alt="Foto de perfil de <%= nickname %>">
-
                                 <% } else { %>
-
                                     <span>Sin foto</span>
-
                                 <% } %>
 
                                 <span class="perfil-foto-overlay">
                                     Cambiar foto
                                 </span>
-
                             </a>
 
                         <% } else { %>
 
-                            <!-- En perfiles ajenos la foto no es editable -->
-                            <div class="perfil-foto-boton"
-                                 style="cursor: default">
+                            <div class="perfil-foto-boton" style="cursor: default">
 
                                 <% if (!urlFoto.isEmpty()) { %>
-
                                     <img src="<%= urlFoto %>"
                                          alt="Foto de perfil de <%= nickname %>">
-
                                 <% } else { %>
-
                                     <span>Sin foto</span>
-
                                 <% } %>
 
                             </div>
@@ -437,12 +424,10 @@
                             </div>
 
                             <% if (esPropioPerfil) { %>
-
                                 <a href="<%= request.getContextPath() %>/ModificarDatosUsuarioServlet?nickname=<%= URLEncoder.encode(nickname, "UTF-8") %>"
                                    class="btn btn-outline-primary mt-2">
                                     Modificar datos
                                 </a>
-
                             <% } %>
 
                             <%
@@ -450,7 +435,7 @@
                                         session.getAttribute("usuario");
 
                                 boolean haySesion =
-                                        usuarioSesionAtributo instanceof Usuario;
+                                        usuarioSesionAtributo instanceof UsuarioDTO;
                             %>
 
                             <% if (!esPropioPerfil && haySesion) { %>
@@ -491,7 +476,6 @@
 
                             <% } %>
                         </div>
-
                     </div>
 
                     <!-- Pestañas -->
@@ -571,66 +555,75 @@
                                 <%= esEstudiante ? "Mis cursos" : "Ediciones de cursos" %>
                             </h2>
 
-                            <% if (esEstudiante) {
-                                Estudiante estudiante = (Estudiante) usuario;
+                            <% if (esEstudiante) { 
+
                                 boolean hayCursos = false;
 
-                                for (InscripcionCurso inscripcion : estudiante.getCursos()) {
-                                    EstadoInscripcion estado = inscripcion.getEstado();
+                                if (inscripcionesCursos != null) {
+                                    for (InscripcionCursoDTO inscripcion : inscripcionesCursos) {
 
-                                    boolean mostrar =
-                                            estado == EstadoInscripcion.INSCRIPTO
-                                            || estado == EstadoInscripcion.ACEPTADA
-                                            || (esPropioPerfil
-                                                && estado == EstadoInscripcion.RECHAZADA);
+                                        String estado = inscripcion.getEstado();
 
-                                    if (!mostrar) {
-                                        continue;
-                                    }
+                                        boolean mostrar =
+                                                "INSCRIPTO".equals(estado)
+                                                || "ACEPTADA".equals(estado)
+                                                || (esPropioPerfil && "RECHAZADA".equals(estado));
 
-                                    EdicionCurso edicion = inscripcion.getCurso();
+                                        if (!mostrar) {
+                                            continue;
+                                        }
 
-                                    if (edicion == null) {
-                                        continue;
-                                    }
+                                        String nombreEdicion = inscripcion.getNombreEdicion();
+                                        String nombreCurso = inscripcion.getNombreCurso();
 
-                                    hayCursos = true;
+                                        if (nombreEdicion == null) {
+                                            continue;
+                                        }
+
+                                        hayCursos = true;
                             %>
 
                                 <div class="perfil-elemento">
-                                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
-                                        <div>
 
+                                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+
+                                        <div>
                                             <h3 class="h6 mb-2">
-                                                <%= edicion.getNombre() %>
+                                                <%= nombreEdicion %>
                                             </h3>
 
-                                            <% if (edicion.getCurso() != null) { %>
+                                            <% if (nombreCurso != null) { %>
                                                 <p class="text-secondary mb-2">
-                                                    Curso: <%= edicion.getCurso().getNombre() %>
+                                                    Curso: <%= nombreCurso %>
                                                 </p>
                                             <% } %>
                                         </div>
-                                            <div>
-                                            <span class="perfil-estado <%= estado == EstadoInscripcion.ACEPTADA
-                                                        ? "aceptada"
-                                                        : estado == EstadoInscripcion.RECHAZADA
-                                                            ? "rechazada" : "inscripto" %>">
+
+                                        <div>
+                                            <span class="perfil-estado <%= "ACEPTADA".equals(estado)
+                                                    ? "aceptada"
+                                                    : "RECHAZADA".equals(estado)
+                                                        ? "rechazada" : "inscripto" %>">
                                                 <%= estado %>
                                             </span>
-                                            <div class="mt-3">
-                                                <a href="<%= request.getContextPath() %>/SvltConsultarCurso?nombre=<%= URLEncoder.encode(edicion.getCurso().getNombre(), "UTF-8") %>&amp;edicion=<%= URLEncoder.encode(edicion.getNombre(), "UTF-8") %>"
-                                                   class="btn btn-outline-primary btn-sm">
-                                                    Consultar edición
-                                                    <i class="bi bi-arrow-right ms-1"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
 
+                                            <% if (nombreCurso != null) { %>
+                                                <div class="mt-3">
+                                                    <a href="<%= request.getContextPath() %>/SvltConsultarCurso?nombre=<%= URLEncoder.encode(nombreCurso, "UTF-8") %>&amp;edicion=<%= URLEncoder.encode(nombreEdicion, "UTF-8") %>"
+                                                       class="btn btn-outline-primary btn-sm">
+                                                        Consultar edición
+                                                        <i class="bi bi-arrow-right ms-1"></i>
+                                                    </a>
+                                                </div>
+                                            <% } %>
+                                        </div>
+
+                                    </div>
                                 </div>
 
-                            <% } %>
+                            <%      }
+                                }
+                            %>
 
                                 <% if (!hayCursos) { %>
                                     <p class="text-secondary mb-0">
@@ -639,38 +632,48 @@
                                 <% } %>
 
                             <% } else if (esDocente) {
-                                Docente docente = (Docente) usuario;
+
                                 boolean hayEdiciones = false;
 
-                                for (EdicionCurso edicion : docente.getEdiciones()) {
-                                    if (edicion == null) {
-                                        continue;
-                                    }
+                                if (edicionesDocente != null) {
+                                    for (EdicionPerfilDTO edicion : edicionesDocente) {
 
-                                    hayEdiciones = true;
-                                    Map<String, List<InscripcionCurso>> aceptadosPorEdicion =
-                                            (Map<String, List<InscripcionCurso>>) request.getAttribute("aceptadosPorEdicion");
-                                    List<InscripcionCurso> aceptados = aceptadosPorEdicion != null
-                                            ? aceptadosPorEdicion.get(edicion.getNombre()) : null;
-                                    String idAceptados = "aceptados_" + Integer.toUnsignedString(edicion.getNombre().hashCode());
+                                        if (edicion == null || edicion.getNombreEdicion() == null) {
+                                            continue;
+                                        }
+
+                                        hayEdiciones = true;
+
+                                        String nombreEdicion = edicion.getNombreEdicion();
+                                        String nombreCurso = edicion.getNombreCurso();
+
+                                        String idAceptados = "aceptados_"
+                                                + Integer.toUnsignedString(nombreEdicion.hashCode());
+
+                                        List<UsuarioDTO> aceptados =
+                                                edicion.getEstudiantesAceptados();
                             %>
 
                                 <div class="perfil-elemento">
+
                                     <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+
                                         <div>
                                             <h3 class="h6 mb-2">
-                                                <%= edicion.getNombre() %>
+                                                <%= nombreEdicion %>
                                             </h3>
 
-                                            <% if (edicion.getCurso() != null) { %>
+                                            <% if (nombreCurso != null) { %>
                                                 <p class="text-secondary mb-0">
-                                                    Curso: <%= edicion.getCurso().getNombre() %>
+                                                    Curso: <%= nombreCurso %>
                                                 </p>
                                             <% } %>
                                         </div>
+
                                         <div class="mt-3 d-flex flex-wrap gap-2">
-                                            <% if (edicion.getCurso() != null) { %>
-                                                <a href="<%= request.getContextPath() %>/SvltConsultarCurso?nombre=<%= URLEncoder.encode(edicion.getCurso().getNombre(), "UTF-8") %>&amp;edicion=<%= URLEncoder.encode(edicion.getNombre(), "UTF-8") %>"
+
+                                            <% if (nombreCurso != null) { %>
+                                                <a href="<%= request.getContextPath() %>/SvltConsultarCurso?nombre=<%= URLEncoder.encode(nombreCurso, "UTF-8") %>&amp;edicion=<%= URLEncoder.encode(nombreEdicion, "UTF-8") %>"
                                                    class="btn btn-outline-primary btn-sm">
                                                     Consultar edición
                                                     <i class="bi bi-arrow-right ms-1"></i>
@@ -687,33 +690,54 @@
                                                     Ver estudiantes aceptados
                                                 </button>
                                             <% } %>
+
                                         </div>
                                     </div>
 
                                     <% if (esPropioPerfil) { %>
+
                                         <div class="collapse mt-3" id="<%= idAceptados %>">
+
                                             <% if (aceptados == null || aceptados.isEmpty()) { %>
+
                                                 <p class="text-secondary small mb-0">
                                                     No hay estudiantes aceptados en esta edición.
                                                 </p>
+
                                             <% } else { %>
+
                                                 <ul class="list-group">
-                                                    <% for (InscripcionCurso inscripcionAceptada : aceptados) { %>
+
+                                                    <% for (UsuarioDTO estudiante : aceptados) { %>
+
                                                         <li class="list-group-item">
-                                                            <strong><%= inscripcionAceptada.getEstudiante().getNombre() %>
-                                                            <%= inscripcionAceptada.getEstudiante().getApellido() %></strong>
+
+                                                            <strong>
+                                                                <%= estudiante.getNombre() %>
+                                                                <%= estudiante.getApellido() %>
+                                                            </strong>
+
                                                             <div class="text-secondary small">
-                                                                Nickname: <%= inscripcionAceptada.getEstudiante().getNickname() %>
+                                                                Nickname: <%= estudiante.getNickname() %>
                                                             </div>
+
                                                         </li>
+
                                                     <% } %>
+
                                                 </ul>
+
                                             <% } %>
+
                                         </div>
+
                                     <% } %>
+
                                 </div>
-                                    
-                            <% } %>
+
+                            <%      }
+                                }
+                            %>
 
                                 <% if (!hayEdiciones) { %>
                                     <p class="text-secondary mb-0">
@@ -731,44 +755,52 @@
 
                         </section>
 
-                        <!-- PROGRAMAS: solamente para estudiantes -->
-                        <% if (esEstudiante) {
-                            Estudiante estudiante = (Estudiante) usuario;
-                        %>
+                        <!-- PROGRAMAS -->
+                        <% if (esEstudiante) { %>
 
                             <section id="programas"
                                      class="perfil-seccion"
                                      role="tabpanel">
 
                                 <h2 class="h5 mb-3">Programas de formación</h2>
-                                
+
                                 <%
                                     boolean hayProgramas = false;
-                                    
-                                    for (InscripcionPrograma inscripcion
-                                            : estudiante.getProgramas()) {
 
-                                        EstadoInscripcion estado = inscripcion.getEstado();
-                                        
+                                    if (inscripcionesProgramas != null) {
+                                        for (InscripcionProgramaDTO inscripcion : inscripcionesProgramas) {
 
-                                        boolean mostrar =
-                                                estado == EstadoInscripcion.INSCRIPTO
-                                                || estado == EstadoInscripcion.ACEPTADA
-                                                || (esPropioPerfil
-                                                    && estado == EstadoInscripcion.RECHAZADA);
-                                        
+                                            String estado = inscripcion.getEstado();
 
-                                        if (!mostrar) {
-                                            continue;
-                                        }
+                                            boolean mostrar =
+                                                    "INSCRIPTO".equals(estado)
+                                                    || "ACEPTADA".equals(estado)
+                                                    || (esPropioPerfil && "RECHAZADA".equals(estado));
 
-                                        ProgramaFormacion programa = inscripcion.getPrograma();
+                                            if (!mostrar) {
+                                                continue;
+                                            }
 
-                                        if (programa == null) {
-                                            continue;
-                                        }
+                                            String nombrePrograma = inscripcion.getNombrePrograma();
 
-                                        hayProgramas = true;
+                                            if (nombrePrograma == null) {
+                                                continue;
+                                            }
+
+                                            hayProgramas = true;
+
+                                            String fechaInscripcion = "";
+
+                                            if (inscripcion.getFechaInscripcion() != null
+                                                    && !inscripcion.getFechaInscripcion().isEmpty()) {
+                                                try {
+                                                    fechaInscripcion = LocalDate.parse(
+                                                            inscripcion.getFechaInscripcion()
+                                                    ).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                                                } catch (Exception e) {
+                                                    fechaInscripcion = inscripcion.getFechaInscripcion();
+                                                }
+                                            }
                                 %>
 
                                     <div class="perfil-elemento">
@@ -777,28 +809,26 @@
 
                                             <div>
                                                 <h3 class="h6 mb-2">
-                                                    <%= programa.getNombre() %>
+                                                    <%= nombrePrograma %>
                                                 </h3>
 
                                                 <p class="text-secondary small mb-2">
                                                     Fecha de inscripción:
-                                                    <%= inscripcion.getFechaIns() != null
-                                                            ? inscripcion.getFechaIns().format(
-                                                                DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                                                            : "No especificada" %>
+                                                    <%= fechaInscripcion.isEmpty()
+                                                            ? "No especificada" : fechaInscripcion %>
                                                 </p>
                                             </div>
 
                                             <div class="d-flex flex-column align-items-start gap-2">
 
-                                                <span class="perfil-estado <%= estado == EstadoInscripcion.ACEPTADA
-                                                            ? "aceptada"
-                                                            : estado == EstadoInscripcion.RECHAZADA
-                                                                ? "rechazada" : "inscripto" %>">
+                                                <span class="perfil-estado <%= "ACEPTADA".equals(estado)
+                                                        ? "aceptada"
+                                                        : "RECHAZADA".equals(estado)
+                                                            ? "rechazada" : "inscripto" %>">
                                                     <%= estado %>
                                                 </span>
 
-                                                <a href="<%= request.getContextPath() %>/consultarPrograma?programa=<%= URLEncoder.encode(programa.getNombre(), "UTF-8") %>"
+                                                <a href="<%= request.getContextPath() %>/consultarPrograma?programa=<%= URLEncoder.encode(nombrePrograma, "UTF-8") %>"
                                                    class="btn btn-outline-primary btn-sm">
                                                     Consultar programa
                                                     <i class="bi bi-arrow-right ms-1"></i>
@@ -810,7 +840,9 @@
 
                                     </div>
 
-                                <% } %>
+                                <%      }
+                                    }
+                                %>
 
                                 <% if (!hayProgramas) { %>
                                     <p class="text-secondary mb-0">
@@ -823,7 +855,6 @@
                         <% } %>
 
                     </div>
-
                 </div>
 
             <% } %>
