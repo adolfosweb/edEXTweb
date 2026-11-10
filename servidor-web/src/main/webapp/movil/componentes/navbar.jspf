@@ -1,5 +1,15 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%-- Barra de navegación común. TODO: mostrar el nick del usuario y habilitar "Salir" cuando exista el login. --%>
+<%@page import="com.mycompany.edextweb.soap.UsuarioDTO"%>
+<%
+    // Todas las páginas del móvil exigen sesión iniciada.
+    UsuarioDTO _mUsuario = (UsuarioDTO) session.getAttribute("usuario");
+    if (_mUsuario == null) {
+        response.sendRedirect(request.getContextPath() + "/movil/login");
+        return;
+    }
+    String _mNick = _mUsuario.getNickname() == null ? "" : _mUsuario.getNickname()
+            .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+%>
 <style>
     .logo-ext {
         width: 40px; height: 40px; border-radius: 50%; border: 2px solid #1d3557;
@@ -13,13 +23,13 @@
                 data-bs-target="#menu" aria-controls="menu" aria-expanded="false" aria-label="Abrir menú">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <a class="navbar-brand mx-auto" href="<%= request.getContextPath() %>/movil/componentes/index.jsp">Bienvenido</a>
+        <a class="navbar-brand mx-auto" href="<%= request.getContextPath() %>/movil/componentes/index.jsp">Bienvenido <%= _mNick %></a>
         <span class="logo-ext" aria-hidden="true">EXT</span>
         <div class="collapse navbar-collapse w-100" id="menu">
             <ul class="navbar-nav pt-2">
                 <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath() %>/movil/cursos">Ver Cursos</a></li>
-                <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath() %>/movil/componentes/ediciones.jsp">Ver Ediciones</a></li>
-                <li class="nav-item"><a class="nav-link disabled" href="#" aria-disabled="true">Salir</a></li>
+                <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath() %>/movil/ediciones">Ver Ediciones</a></li>
+                <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath() %>/movil/logout">Salir</a></li>
             </ul>
         </div>
     </div>

@@ -20,6 +20,22 @@
 <main class="container py-3">
     <h1 class="h4 mb-3">Ver Cursos</h1>
 
+    <div class="dropdown mb-3">
+        <button class="btn btn-primary dropdown-toggle" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+            <c:out value="${empty institutoElegido ? 'Instituto' : institutoElegido}"/>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/movil/cursos">Todos</a></li>
+            <c:forEach var="inst" items="${institutos}">
+                <c:url var="filtro" value="/movil/cursos">
+                    <c:param name="instituto" value="${inst}"/>
+                </c:url>
+                <li><a class="dropdown-item" href="${filtro}"><c:out value="${inst}"/></a></li>
+            </c:forEach>
+        </ul>
+    </div>
+
     <c:choose>
         <c:when test="${not empty mensajeError}">
             <div class="alert alert-danger"><c:out value="${mensajeError}"/></div>
