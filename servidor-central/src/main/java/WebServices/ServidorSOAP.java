@@ -7,12 +7,12 @@ public class ServidorSOAP {
 
     public static void main(String[] args) throws InterruptedException {
 
-        String direccion = "http://0.0.0.0:8081/edext/edext";
+        String direccion = Configuracion.get("servidor.url");
 
-        Endpoint endpoint = Endpoint.publish(direccion,new EdextWebService());
+        Endpoint.publish(direccion, new EdextWebService());
 
         System.out.println("Servidor SOAP iniciado.");
-        System.out.println("WSDL: http://localhost:8081/edext/edext?wsdl");
+        System.out.println("WSDL: " + direccion + "?wsdl");
 
         new CountDownLatch(1).await();
     }

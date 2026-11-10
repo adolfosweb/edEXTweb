@@ -31,6 +31,7 @@ import Datatypes.EdicionDetalleDTO;
 import Datatypes.ProgramaDetalleDTO;
 import Datatypes.CursoAltaFormularioDTO;
 import Datatypes.CursoEdicionFormularioDTO;
+import Datatypes.CursoTendenciaDTO;
 
 // Fabric
 import Fabric.Fabric;
@@ -777,6 +778,40 @@ public class EdextWebService {
 
         return fecha.toString();
     }
+    
+    @WebMethod
+public void registrarVisitaCurso(String nombreCurso) {
+    EntityManager em = Conexion.getInstancia().getEntityManager();
+    try {
+        em.getTransaction().begin();
+        em.createQuery("UPDATE Curso c SET c.visitas = c.visitas + 1 WHERE c.nombre = :n")
+          .setParameter("n", nombreCurso)
+          .executeUpdate();
+        em.getTransaction().commit();
+    } catch (RuntimeException e) {
+        if (em.getTransaction().isActive()) em.getTransaction().rollback();
+        throw e;
+    } finally {
+        em.close();
+    }
+}
+
+    @WebMethod
+    public List<CursoTendenciaDTO> listarCursosMasVisitados() {
+    EntityManager em = Conexion.getInstancia().getEntityManager();
+    try {
+        List<Curso> cursos = em.createQuery(
+            "SELECT c FROM Curso c ORDER BY c.visitas DESC, c.nombre ASC", Curso.class)
+            .getResultList();
+        List<CursoTendenciaDTO> resultado = new ArrayList<>();
+        for (Curso c : cursos) {
+            resultado.add(new CursoTendenciaDTO(c.getNombre(), c.getVisitas()));
+        }
+        return resultado;
+    } finally {
+        em.close();
+    }
+}
     
     // =====================================
     // ALTA DE EDICIONES

@@ -1,48 +1,44 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Controladores;
 
-/**
- *
- * @author adolfo
- */
-
-
+import WebServices.Configuracion;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Conexion {
 
     private static Conexion instancia;
     private EntityManagerFactory emf;
 
-   private Conexion() {
-    try {
-        emf = Persistence.createEntityManagerFactory("my_persistence_unit");
-        System.out.println("EntityManagerFactory creado correctamente.");
-    } catch (Exception e) {
-        System.err.println("ERROR AL INICIALIZAR JPA:");
-        e.printStackTrace();
-        throw new RuntimeException("No se pudo inicializar JPA", e);
+    private Conexion() {
+        try {
+            Map<String, String> cfg = new HashMap<>();
+            cfg.put("jakarta.persistence.jdbc.url", Configuracion.get("db.url"));
+            cfg.put("jakarta.persistence.jdbc.user", Configuracion.get("db.user"));
+            cfg.put("jakarta.persistence.jdbc.password", Configuracion.get("db.password"));
+
+            emf = Persistence.createEntityManagerFactory("my_persistence_unit", cfg);
+            System.out.println("EntityManagerFactory creado correctamente.");
+        } catch (Exception e) {
+            System.err.println("ERROR AL INICIALIZAR JPA:");
+            e.printStackTrace();
+            throw new RuntimeException("No se pudo inicializar JPA", e);
+        }
     }
-}
 
     public EntityManager getEntityManager() {
         if (emf == null) {
             throw new IllegalStateException("EntityManagerFactory no fue inicializado.");
         }
-
         return emf.createEntityManager();
     }
 
-    public static Conexion getInstancia() {
+    public static synchronized Conexion getInstancia() {
         if (instancia == null) {
             instancia = new Conexion();
         }
         return instancia;
     }
-
-} 
+}

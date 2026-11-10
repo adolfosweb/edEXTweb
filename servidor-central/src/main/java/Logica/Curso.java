@@ -39,6 +39,9 @@ public class Curso implements Serializable {
     private Date fecRegistro;
 
     private String url;
+    
+    @Column(nullable = false)
+    private int visitas = 0;
 
     // Un curso se brinda en un solo instituto
     @ManyToOne
@@ -112,6 +115,10 @@ public class Curso implements Serializable {
     public int getCantCreditos() {
         return cantCreditos;
     }
+    
+    public int getVisitas() {
+        return visitas;
+    }
 
     public Date getFecRegistro() {
         return fecRegistro;
@@ -159,6 +166,10 @@ public class Curso implements Serializable {
 
     public void setCantHoras(int cantHoras) {
         this.cantHoras = cantHoras;
+    }
+    
+    public void setVisitas(int visitas) {
+        this.visitas = visitas;
     }
 
     public void setCantCreditos(int cantCreditos) {
