@@ -32,6 +32,7 @@ import Datatypes.ProgramaDetalleDTO;
 import Datatypes.CursoAltaFormularioDTO;
 import Datatypes.CursoEdicionFormularioDTO;
 import Datatypes.CursoTendenciaDTO;
+import Datatypes.EvaluacionDTO;
 
 // Fabric
 import Fabric.Fabric;
@@ -780,21 +781,21 @@ public class EdextWebService {
     }
     
     @WebMethod
-public void registrarVisitaCurso(String nombreCurso) {
-    EntityManager em = Conexion.getInstancia().getEntityManager();
-    try {
-        em.getTransaction().begin();
-        em.createQuery("UPDATE Curso c SET c.visitas = c.visitas + 1 WHERE c.nombre = :n")
-          .setParameter("n", nombreCurso)
-          .executeUpdate();
-        em.getTransaction().commit();
-    } catch (RuntimeException e) {
-        if (em.getTransaction().isActive()) em.getTransaction().rollback();
-        throw e;
-    } finally {
-        em.close();
+    public void registrarVisitaCurso(String nombreCurso) {
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.createQuery("UPDATE Curso c SET c.visitas = c.visitas + 1 WHERE c.nombre = :n")
+              .setParameter("n", nombreCurso)
+              .executeUpdate();
+            em.getTransaction().commit();
+        } catch (RuntimeException e) {
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
     }
-}
 
     @WebMethod
     public List<CursoTendenciaDTO> listarCursosMasVisitados() {
@@ -1570,6 +1571,7 @@ public void registrarVisitaCurso(String nombreCurso) {
                 dto.setFechaInicio(edicion.getFechaInicio() != null ? edicion.getFechaInicio().toString() : null);
                 dto.setFechaFin(edicion.getFechaFin() != null ? edicion.getFechaFin().toString() : null);
                 dto.setCupo(edicion.getCupo());
+                dto.setCerrada(edicion.isCerrada());
                 resultado.add(dto);
             }
         } finally {
@@ -1611,11 +1613,14 @@ public void registrarVisitaCurso(String nombreCurso) {
             if (inscripcion.getEstudiante() != null) {
                 estudianteDTO = convertirUsuario(inscripcion.getEstudiante());
             }
-            resultado.add(new InscripcionSeleccionDTO(
+            InscripcionSeleccionDTO dto = new InscripcionSeleccionDTO(
                     inscripcion.getId(),
                     estudianteDTO,
                     inscripcion.getFechaIns() != null ? inscripcion.getFechaIns().toString() : null,
-                    inscripcion.getEstado() != null ? inscripcion.getEstado().name() : null));
+                    inscripcion.getEstado() != null ? inscripcion.getEstado().name() : null );
+
+            dto.setNota(inscripcion.getNota());
+            resultado.add(dto);
         }
         return resultado;
     }
@@ -1659,11 +1664,105 @@ public void registrarVisitaCurso(String nombreCurso) {
         if (!inscripcionPertenece) {
             return new ResultadoOperacionDTO(false,"La inscripción no pertenece a la edición seleccionada.");
         }
+        EdicionCurso edicion = controladorCurso.buscarEdicion(nombreEdicion);
+        if (edicion == null || edicion.isCerrada()) {
+            return new ResultadoOperacionDTO(false,"No se pueden modificar inscripciones de una edición cerrada.");
+        }
         boolean actualizado = controladorCurso.cambiarEstadoInscripcion(idInscripcion, nuevoEstado);
         if (!actualizado) {
             return new ResultadoOperacionDTO(false,"No se pudo actualizar el estado de la inscripción.");
         }
         return new ResultadoOperacionDTO(true, nuevoEstado == EstadoInscripcion.ACEPTADA ? "La inscripción fue aceptada correctamente." : "La inscripción fue rechazada correctamente.");
+    }
+    
+    private boolean docentePuedeGestionarEdicion(String nickname,String nombreInstituto,String nombreCurso,String nombreEdicion) {
+        if(nickname == null || nickname.isBlank()
+                || nombreInstituto == null || nombreInstituto.isBlank()
+                || nombreCurso == null || nombreCurso.isBlank()
+                || nombreEdicion == null || nombreEdicion.isBlank()) {
+            return false;
+        }
+        List<EdicionCursoDTO> ediciones = listarEdicionesDocente(nickname, nombreInstituto, nombreCurso);
+        return ediciones != null && ediciones.stream().anyMatch(e -> nombreEdicion.equals(e.getNombre()));
+    }
+    
+    @WebMethod
+    public ResultadoOperacionDTO guardarEvaluacionesDocente(
+            @WebParam(name = "nickname") String nickname,
+            @WebParam(name = "nombreInstituto") String nombreInstituto,
+            @WebParam(name = "nombreCurso") String nombreCurso,
+            @WebParam(name = "nombreEdicion") String nombreEdicion,
+            @WebParam(name = "evaluaciones") List<EvaluacionDTO> evaluaciones) {
+
+        if(!docentePuedeGestionarEdicion(nickname, nombreInstituto, nombreCurso, nombreEdicion)) {
+            return new ResultadoOperacionDTO(false,"No tienes permiso para gestionar esta edición.");
+        }
+        if(evaluaciones == null || evaluaciones.isEmpty()) {
+            return new ResultadoOperacionDTO(false,"No se ingresaron evaluaciones.");
+        }
+        EdicionCurso edicion = controladorCurso.buscarEdicion(nombreEdicion);
+        if (edicion == null) {
+            return new ResultadoOperacionDTO(false,"No se encontró la edición seleccionada.");
+        }
+        if(edicion.isCerrada()) {
+            return new ResultadoOperacionDTO(false,"La edición está cerrada y no permite modificar evaluaciones.");
+        }
+        Map<Long, Integer> notas = new LinkedHashMap<>();
+        for(EvaluacionDTO evaluacion : evaluaciones) {
+            if(evaluacion == null || evaluacion.getIdInscripcion() == null || evaluacion.getNota() == null) {
+                return new ResultadoOperacionDTO(false,"Todas las evaluaciones deben tener una nota.");
+            }
+            Integer nota = evaluacion.getNota();
+            if(nota < 1 || nota > 12) {
+                return new ResultadoOperacionDTO(false,"Las notas deben estar comprendidas entre 1 y 12.");
+            }
+            if(notas.containsKey(evaluacion.getIdInscripcion())) {
+                return new ResultadoOperacionDTO(false,"Se recibió más de una nota para el mismo estudiante.");
+            }
+            notas.put(evaluacion.getIdInscripcion(), nota);
+        }
+        boolean guardado = controladorCurso.guardarNotasEdicion(nombreEdicion, notas);
+        if(!guardado) {
+            return new ResultadoOperacionDTO(false,"No se pudieron guardar las evaluaciones. Verifica los datos e inténtalo nuevamente.");
+        }
+        return new ResultadoOperacionDTO(true,"Las evaluaciones fueron guardadas correctamente.");
+    }
+    
+    
+    @WebMethod
+    public ResultadoOperacionDTO cerrarEdicionDocente(
+            @WebParam(name = "nickname") String nickname,
+            @WebParam(name = "nombreInstituto") String nombreInstituto,
+            @WebParam(name = "nombreCurso") String nombreCurso,
+            @WebParam(name = "nombreEdicion") String nombreEdicion) {
+
+        if(!docentePuedeGestionarEdicion(nickname, nombreInstituto, nombreCurso, nombreEdicion)) {
+            return new ResultadoOperacionDTO(false,"No tienes permiso para cerrar esta edición.");
+        }
+        EdicionCurso edicion = controladorCurso.buscarEdicion(nombreEdicion);
+        if(edicion == null) {
+            return new ResultadoOperacionDTO(false,"No se encontró la edición seleccionada.");
+        }
+        if(edicion.isCerrada()) {
+            return new ResultadoOperacionDTO(false,"La edición ya se encuentra cerrada.");
+        }
+        List<InscripcionCurso> inscripciones = controladorCurso.listarInscripcionesEdicion(nombreEdicion);
+        if(inscripciones != null) {
+            for(InscripcionCurso inscripcion : inscripciones) {
+                if(inscripcion == null || inscripcion.getEstado() != EstadoInscripcion.ACEPTADA) {
+                    continue;
+                }
+                Integer nota = inscripcion.getNota();
+                if(nota == null || nota < 1 || nota > 12) {
+                    return new ResultadoOperacionDTO(false,"No se puede cerrar la edición: todavía hay estudiantes sin evaluar.");
+                }
+            }
+        }
+        boolean cerrada = controladorCurso.cerrarEdicion(nombreEdicion);
+        if (!cerrada) {
+            return new ResultadoOperacionDTO(false,"No se pudo cerrar la edición.");
+        }
+        return new ResultadoOperacionDTO(true,"La edición fue cerrada correctamente. Las evaluaciones ya no podrán modificarse.");
     }
 
     
@@ -1693,18 +1792,42 @@ public void registrarVisitaCurso(String nombreCurso) {
             InscripcionCursoDTO dto = new InscripcionCursoDTO();
             EdicionCurso edicion = inscripcion.getCurso();
             dto.setNombreEdicion(edicion != null ? edicion.getNombre() : null);
-            dto.setNombreCurso(
-                    edicion != null && edicion.getCurso() != null
-                            ? edicion.getCurso().getNombre()
-                            : null);
-            dto.setFechaInscripcion(
-                    inscripcion.getFechaIns() != null
-                            ? inscripcion.getFechaIns().toString()
-                            : null);
-            dto.setEstado(
-                    inscripcion.getEstado() != null
-                            ? inscripcion.getEstado().toString()
-                            : null);
+            dto.setNombreCurso(edicion != null && edicion.getCurso() != null ? edicion.getCurso().getNombre() : null);
+            dto.setFechaInscripcion(inscripcion.getFechaIns() != null ? inscripcion.getFechaIns().toString() : null);
+            dto.setEstado(inscripcion.getEstado() != null ? inscripcion.getEstado().toString() : null);
+            resultado.add(dto);
+        }
+        return resultado;
+    }
+    
+    @WebMethod
+    public List<InscripcionCursoDTO> verResultadosEvaluacionesEstudiante(@WebParam(name = "nickname") String nickname) {
+        List<InscripcionCursoDTO> resultado = new ArrayList<>();
+        if(nickname == null || nickname.isBlank()) {
+            return resultado;
+        }
+        Usuario usuario = controladorUsuario.buscarUsuario(nickname);
+        if(!(usuario instanceof Estudiante)) {
+            return resultado;
+        }
+        List<InscripcionCurso> inscripciones = controladorCurso.listarInscripcionesEstudiante(nickname);
+        if(inscripciones == null) {
+            return resultado;
+        }
+        for(InscripcionCurso inscripcion : inscripciones) {
+            if(inscripcion == null) {
+                continue;
+            }
+            EdicionCurso edicion = inscripcion.getCurso();
+            if(edicion == null || !edicion.isCerrada()) {
+                continue;
+            }
+            InscripcionCursoDTO dto = new InscripcionCursoDTO();
+            dto.setNombreEdicion(edicion.getNombre());
+            dto.setNombreCurso(edicion.getCurso() != null ? edicion.getCurso().getNombre() : null);
+            dto.setFechaInscripcion(inscripcion.getFechaIns() != null ? inscripcion.getFechaIns().toString(): null);
+            dto.setEstado(inscripcion.getEstado() != null ? inscripcion.getEstado().toString() : null);
+            dto.setNota(inscripcion.getNota() != null ? inscripcion.getNota().toString() : null);
             resultado.add(dto);
         }
         return resultado;

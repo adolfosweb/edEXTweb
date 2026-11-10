@@ -14,6 +14,7 @@ public class EdicionCursoDTO {
     private String fechaInicio;
     private String fechaFin;
     private int cupo;
+    private boolean cerrada;
 
     public EdicionCursoDTO() {
     }
@@ -74,5 +75,13 @@ public class EdicionCursoDTO {
 
     public void setCupo(int cupo) {
         this.cupo = cupo;
+    }
+    
+    public boolean isCerrada() {
+        return cerrada;
+    }
+
+    public void setCerrada(boolean cerrada) {
+        this.cerrada = cerrada;
     }
 }

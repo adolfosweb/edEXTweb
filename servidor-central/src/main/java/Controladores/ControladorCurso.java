@@ -524,4 +524,116 @@ public class ControladorCurso implements IControladorCurso {
             em.close();
         }
     }
+    
+    
+    @Override
+    public boolean guardarNotasEdicion(String nombreEdicion,Map<Long, Integer> notas) {
+        if(nombreEdicion == null || nombreEdicion.trim().isEmpty() || notas == null || notas.isEmpty()) {
+            return false;
+        }
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            EdicionCurso edicion = em.find(EdicionCurso.class, nombreEdicion);
+            if(edicion == null || edicion.isCerrada()) {
+                tx.rollback();
+                return false;
+            }
+            Map<Long, InscripcionCurso> inscripciones = new HashMap<>();
+
+            for(Map.Entry<Long, Integer> entrada : notas.entrySet()) {
+
+                Long idInscripcion = entrada.getKey();
+                Integer nota = entrada.getValue();
+
+                if(idInscripcion == null || (nota != null && (nota < 1 || nota > 12))) {
+                    tx.rollback();
+                    return false;
+                }
+                InscripcionCurso inscripcion = em.find(InscripcionCurso.class, idInscripcion);
+
+                if(inscripcion == null
+                        || inscripcion.getCurso() == null
+                        || !nombreEdicion.equals(inscripcion.getCurso().getNombre())
+                        || inscripcion.getEstado() != Logica.EstadoInscripcion.ACEPTADA) {
+
+                    tx.rollback();
+                    return false;
+                }
+                inscripciones.put(idInscripcion, inscripcion);
+            }
+
+            // Si todas son válidas, aplicamos los cambios.
+            for(Map.Entry<Long, Integer> entrada : notas.entrySet()) {
+                InscripcionCurso inscripcion = inscripciones.get(entrada.getKey());
+
+                inscripcion.setNota(entrada.getValue());
+            }
+            tx.commit();
+            return true;
+        } catch(Exception e) {
+            if(tx.isActive()) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean cerrarEdicion(String nombreEdicion) {
+        if(nombreEdicion == null || nombreEdicion.trim().isEmpty()) {
+            return false;
+        }
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+            EdicionCurso edicion = em.find(EdicionCurso.class, nombreEdicion);
+
+            if(edicion == null || edicion.isCerrada()) {
+                tx.rollback();
+                return false;
+            }
+
+            // Recuperamos las inscripciones de estudiantes aceptados.
+            List<InscripcionCurso> inscripcionesAceptadas =
+                    em.createQuery(
+                        "SELECT i FROM InscripcionCurso i "
+                        + "WHERE i.edicionCurso.nombre = :nombre "
+                        + "AND i.estado = :estado",
+                        InscripcionCurso.class
+                    )
+                    .setParameter("nombre", nombreEdicion)
+                    .setParameter("estado", Logica.EstadoInscripcion.ACEPTADA)
+                    .getResultList();
+
+            // No se permite cerrar si falta alguna evaluación.
+            for (InscripcionCurso inscripcion : inscripcionesAceptadas) {
+                Integer nota = inscripcion.getNota();
+                if (nota == null || nota < 1 || nota > 12) {
+                    tx.rollback();
+                    return false;
+                }
+            }
+
+            edicion.setCerrada(true);
+            tx.commit();
+            return true;
+
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
 }

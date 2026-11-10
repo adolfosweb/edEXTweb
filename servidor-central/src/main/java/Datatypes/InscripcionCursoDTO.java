@@ -8,16 +8,23 @@ public class InscripcionCursoDTO implements Serializable {
     private String nombreCurso;
     private String fechaInscripcion;
     private String estado;
+    private String nota;
 
     public InscripcionCursoDTO() {
     }
+    
+    public InscripcionCursoDTO(String nombreEdicion, String nombreCurso,
+        String fechaInscripcion, String estado) {
+    this(nombreEdicion, nombreCurso, fechaInscripcion, estado, null);
+    }
 
-    public InscripcionCursoDTO(String nombreEdicion,String nombreCurso,String fechaInscripcion,String estado) {
-
+    public InscripcionCursoDTO(String nombreEdicion, String nombreCurso,
+            String fechaInscripcion, String estado, String nota) {
         this.nombreEdicion = nombreEdicion;
         this.nombreCurso = nombreCurso;
         this.fechaInscripcion = fechaInscripcion;
         this.estado = estado;
+        this.nota = nota;
     }
 
     public String getNombreEdicion() {
@@ -50,5 +57,13 @@ public class InscripcionCursoDTO implements Serializable {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public String getNota() {
+        return nota;
+    }
+
+    public void setNota(String nota) {
+        this.nota = nota;
     }
 }

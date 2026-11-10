@@ -35,7 +35,11 @@
             </li>
             <li class="mb-1">
                 <a href="${pageContext.request.contextPath}/resultadosInscripciones"
-                   class="text-decoration-none text-white">Resultados</a>
+                   class="text-decoration-none text-white">Resultados Inscripciones</a>
+            </li>
+            <li class="mb-1">
+                <a href="${pageContext.request.contextPath}/verResultadosEvaluacionesEstudiante"
+                   class="text-decoration-none text-white">Resultados Evaluaciones</a>
             </li>
         </ul>
     </div>
@@ -68,6 +72,14 @@
             <li class="mb-1">
                 <a href="${pageContext.request.contextPath}/seleccionarEstudiantes"
                    class="text-decoration-none text-white">Selección estudiantes</a>
+            </li>
+            <li class="mb-1">
+                <a href="${pageContext.request.contextPath}/ingresarEvaluaciones"
+                   class="text-decoration-none text-white">Ingresar Evaluaciones</a>
+            </li>
+            <li class="mb-1">
+                <a href="${pageContext.request.contextPath}/verResultadosEvaluaciones"
+                   class="text-decoration-none text-white">Resultados Evaluaciones</a>
             </li>
         </ul>
     </div>

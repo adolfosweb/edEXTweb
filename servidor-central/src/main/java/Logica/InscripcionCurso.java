@@ -25,6 +25,7 @@ public class InscripcionCurso implements Serializable {
     private Long id;
 
     private LocalDate fechaInscripcion;
+    private Integer nota;
 
     @ManyToOne
     private Estudiante estudiante;
@@ -103,6 +104,14 @@ public class InscripcionCurso implements Serializable {
 
     public void setEstado(EstadoInscripcion estado) {
         this.estado = estado;
+    }
+    
+    public Integer getNota(){
+        return this.nota;
+    }
+    
+    public void setNota(Integer nota){
+        this.nota = nota;
     }
 }
 

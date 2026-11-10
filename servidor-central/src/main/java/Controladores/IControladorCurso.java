@@ -47,4 +47,8 @@ public interface IControladorCurso {
     boolean altaCategoria(Categoria categoria);
     
     Categoria buscarCategoria(String nombre);
+    
+    boolean guardarNotasEdicion(String nombreEdicion,Map<Long, Integer> notas);
+
+    boolean cerrarEdicion(String nombreEdicion);
 }

@@ -15,6 +15,7 @@ public class InscripcionSeleccionDTO implements Serializable {
     private UsuarioDTO estudiante;
     private String fechaInscripcion;
     private String estado;
+    private Integer nota;
 
     public InscripcionSeleccionDTO() {
     }
@@ -57,5 +58,13 @@ public class InscripcionSeleccionDTO implements Serializable {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+    
+    public Integer getNota(){
+        return nota;
+    }
+    
+    public void setNota(Integer nota){
+        this.nota = nota;
     }
 }

@@ -26,6 +26,7 @@ public class EdicionCurso implements Serializable {
     private LocalDate fechaFin;
     private int cupo;
     private LocalDate fechaPublicacion;
+    private boolean cerrada;
 
     // Muchas ediciones pertenecen a un curso
     @ManyToOne
@@ -101,6 +102,14 @@ public class EdicionCurso implements Serializable {
 
     public void setFechaPublicacion(LocalDate fecPubli) {
         this.fechaPublicacion = fecPubli;
+    }
+    
+    public void setCerrada(boolean b){
+        this.cerrada = b;
+    }
+    
+    public boolean isCerrada(){
+        return this.cerrada;
     }
 
     // =========================
