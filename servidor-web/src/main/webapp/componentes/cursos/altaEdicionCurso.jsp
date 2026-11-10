@@ -92,21 +92,37 @@
                                 </div>
 
                                 <div class="mb-4">
-                                    <label for="docentes" class="form-label">Docentes participantes</label>
-                                    <select id="docentes" name="docentes" class="form-select" multiple size="6" required>
-                                        <% if (docentes != null) {
-                                            for (String nickname : docentes) { %>
-                                        <option value="<%= escapeHtml(nickname) %>"
-                                            <%= docentesSeleccionados != null && docentesSeleccionados.contains(nickname)
-                                                    ? "selected" : "" %>>
-                                            <%= escapeHtml(nickname) %>
-                                        </option>
-                                        <%  }
-                                        } %>
-                                    </select>
-                                    <div class="form-text">Para seleccionar varios, mantené apretado CTRL.</div>
+                                    <label class="form-label">Docentes participantes</label>
+                                    <% if (docentes != null && !docentes.isEmpty()) { %>
+                                        <div class="border rounded p-3">
+                                            <% for (String nickname : docentes) { %>
+                                                <div class="form-check">
+                                                    <input
+                                                        class="form-check-input"
+                                                        type="checkbox"
+                                                        name="docentes"
+                                                        id="docente_<%= escapeHtml(nickname) %>"
+                                                        value="<%= escapeHtml(nickname) %>"
+                                                        <%= docentesSeleccionados != null
+                                                                && docentesSeleccionados.contains(nickname)
+                                                                ? "checked" : "" %>>
+                                                    <label
+                                                        class="form-check-label"
+                                                        for="docente_<%= escapeHtml(nickname) %>">
+                                                        <%= escapeHtml(nickname) %>
+                                                    </label>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        <div class="form-text">
+                                            Podés seleccionar uno o varios docentes.
+                                        </div>
+                                    <% } else { %>
+                                        <div class="text-muted small">
+                                            No hay docentes disponibles para seleccionar.
+                                        </div>
+                                    <% } %>
                                 </div>
-
                                 <div class="d-flex justify-content-end gap-2">
                                     <a href="<%= request.getContextPath() %>/SvltConsultarCurso?nombre=<%= java.net.URLEncoder.encode(nombreCurso, "UTF-8") %>"
                                        class="btn btn-outline-secondary">Cancelar</a>

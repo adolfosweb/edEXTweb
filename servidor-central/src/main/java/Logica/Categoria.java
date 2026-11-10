@@ -18,6 +18,10 @@ public class Categoria implements Serializable {
     @ManyToMany(mappedBy = "categorias")
     private List<Curso> cursos = new ArrayList<>();
     
+    // Constructor requerido por JPA
+    protected Categoria() {
+    }
+    
     public Categoria(String nombre){
         this.nombre = nombre;
     }

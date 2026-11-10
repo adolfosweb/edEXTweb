@@ -97,11 +97,11 @@
                         <dt class="col-sm-4">Cursos previos</dt>
                         <dd class="col-sm-8">
                             <c:choose>
-                                <c:when test="${empty curso.previas}">
+                                <c:when test="${empty curso.previas.previa}">
                                     No tiene cursos previos.
                                 </c:when>
                                 <c:otherwise>
-                                    <c:forEach var="previa" items="${curso.previas}" varStatus="estado">
+                                    <c:forEach var="previa" items="${curso.previas.previa}" varStatus="estado">
                                         <c:if test="${estado.index > 0}">, </c:if>
                                         <c:out value="${previa}" />
                                     </c:forEach>
@@ -111,12 +111,12 @@
                         <dt class="col-sm-4">Categorías</dt>
                         <dd class="col-sm-8">
                             <c:choose>
-                                <c:when test="${empty curso.categorias}">
+                                <c:when test="${empty curso.categorias.categoria}">
                                     Sin categorías asociadas.
                                 </c:when>
                                 <c:otherwise>
                                     <div class="d-flex flex-wrap gap-2">
-                                        <c:forEach var="categoria" items="${curso.categorias}">
+                                        <c:forEach var="categoria" items="${curso.categorias.categoria}">
                                             <span class="badge text-bg-secondary">
                                                 <c:out value="${categoria}" />
                                             </span>
@@ -131,12 +131,12 @@
             <section class="mt-5">
                 <h2>Ediciones del curso</h2>
                 <c:choose>
-                    <c:when test="${empty curso.ediciones}">
+                    <c:when test="${empty curso.ediciones.edicion}">
                         <p>Este curso no tiene ediciones asociadas.</p>
                     </c:when>
                     <c:otherwise>
                         <ul class="list-group">
-                            <c:forEach var="edicion" items="${curso.ediciones}">
+                            <c:forEach var="edicion" items="${curso.ediciones.edicion}">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span>
                                         <strong>
@@ -161,12 +161,12 @@
             <section class="mt-5">
                 <h2>Programas de formación asociados</h2>
                 <c:choose>
-                    <c:when test="${empty curso.programas}">
+                    <c:when test="${empty curso.programas.programa}">
                         <p>Este curso no está asociado a programas de formación.</p>
                     </c:when>
                     <c:otherwise>
                         <ul class="list-group">
-                            <c:forEach var="programa" items="${curso.programas}">
+                            <c:forEach var="programa" items="${curso.programas.programa}">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span>
                                         <strong>
@@ -231,28 +231,32 @@
                             <dt class="col-sm-4">Docentes participantes</dt>
                             <dd class="col-sm-8">
                                 <c:choose>
-                                    <c:when test="${empty edicionSeleccionada.nombresDocentes}">
+                                    <c:when test="${empty edicionSeleccionada.docentes.docente}">
                                         Ninguno
                                     </c:when>
                                     <c:otherwise>
-                                        <c:forEach var="docente" items="${edicionSeleccionada.nombresDocentes}" varStatus="estado">
-                                            <c:if test="${estado.index > 0}">, </c:if>
-                                            <c:out value="${docente}" />
-                                        </c:forEach>
+                                        <ul class="mb-0">
+                                            <c:forEach var="docente"
+                                                       items="${edicionSeleccionada.docentes.docente}">
+                                                <li><c:out value="${docente}" /></li>
+                                            </c:forEach>
+                                        </ul>
                                     </c:otherwise>
                                 </c:choose>
                             </dd>
-                            <dt class="col-sm-4">Estudiantes inscriptos</dt>
+                            <dt class="col-sm-4">Inscriptos</dt>
                             <dd class="col-sm-8">
                                 <c:choose>
-                                    <c:when test="${empty edicionSeleccionada.nombresInscriptos}">
+                                    <c:when test="${empty edicionSeleccionada.inscriptos.inscripto}">
                                         Ninguno
                                     </c:when>
                                     <c:otherwise>
-                                        <c:forEach var="inscripto" items="${edicionSeleccionada.nombresInscriptos}" varStatus="estado">
-                                            <c:if test="${estado.index > 0}">, </c:if>
-                                            <c:out value="${inscripto}" />
-                                        </c:forEach>
+                                        <ul class="mb-0">
+                                            <c:forEach var="inscripto"
+                                                       items="${edicionSeleccionada.inscriptos.inscripto}">
+                                                <li><c:out value="${inscripto}" /></li>
+                                            </c:forEach>
+                                        </ul>
                                     </c:otherwise>
                                 </c:choose>
                             </dd>

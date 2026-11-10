@@ -141,29 +141,30 @@ public class ControladorPrograma implements IControladorPrograma {
     }
 
     @Override
-public Map<String, ProgramaFormacion> listarProgramas() {
-    EntityManager em = Conexion.getInstancia().getEntityManager();
+    public Map<String, ProgramaFormacion> listarProgramas() {
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        try {
+            List<ProgramaFormacion> lista =
+                    em.createQuery(
+                        "SELECT DISTINCT p FROM ProgramaFormacion p " +
+                        "LEFT JOIN FETCH p.cursos",
+                        ProgramaFormacion.class
+                    ).getResultList();
 
-    try {
-        List<ProgramaFormacion> lista =
-                em.createQuery(
-                    "SELECT DISTINCT p FROM ProgramaFormacion p " +
-                    "LEFT JOIN FETCH p.cursos",
-                    ProgramaFormacion.class
-                ).getResultList();
-
-        Map<String, ProgramaFormacion> mapaProgramas = new HashMap<>();
-
-        for (ProgramaFormacion p : lista) {
-            mapaProgramas.put(p.getNombre(), p);
+            Map<String, ProgramaFormacion> mapaProgramas = new HashMap<>();
+            for(ProgramaFormacion p : lista) {
+                for(Curso curso : p.getCursos()) {
+                    if(curso != null && curso.getCategorias() != null) {
+                        curso.getCategorias().size();
+                    }
+                }
+                mapaProgramas.put(p.getNombre(), p);
+            }
+            return mapaProgramas;
+        } finally {
+            em.close();
         }
-
-        return mapaProgramas;
-
-    } finally {
-        em.close();
     }
-}
     
     @Override
     public boolean agregarCurso(String nombrePrograma, String nombreCurso) {

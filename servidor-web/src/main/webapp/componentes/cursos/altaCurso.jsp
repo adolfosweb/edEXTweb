@@ -170,7 +170,7 @@
                                             Selecciona un instituto
                                         </option>
                                         <c:forEach var="instituto"
-                                                   items="${cursoFormulario.institutos}">
+                                                   items="${cursoFormulario.institutos.instituto}">
                                             <option
                                                 value="<c:out value='${instituto}'/>"
                                                 <c:if test="${instituto eq cursoFormulario.instituto}">
@@ -180,7 +180,7 @@
                                             </option>
                                         </c:forEach>
                                     </select>
-                                    <c:if test="${empty cursoFormulario.institutos}">
+                                    <c:if test="${empty cursoFormulario.institutos.instituto}">
                                         <div class="form-text text-danger">
                                             Tu cuenta docente no tiene institutos asociados.
                                         </div>
@@ -191,11 +191,11 @@
                                         Categorías del curso
                                     </label>
                                     <c:choose>
-                                        <c:when test="${not empty cursoFormulario.categorias}">
+                                        <c:when test="${not empty cursoFormulario.categorias.categoria}">
                                             <div class="border rounded p-3">
                                                 <c:forEach
                                                     var="categoria"
-                                                    items="${cursoFormulario.categorias}"
+                                                    items="${cursoFormulario.categorias.categoria}"
                                                     varStatus="estado">
                                                     <div class="form-check">
                                                         <input
@@ -204,7 +204,7 @@
                                                             name="categorias"
                                                             id="categoria_${estado.index}"
                                                             value="<c:out value='${categoria}'/>"
-                                                            <c:if test="${cursoFormulario.categoriasSeleccionadas.contains(categoria)}">
+                                                            <c:if test="${cursoFormulario.categoriasSeleccionadas.categoriaSeleccionada.contains(categoria)}">
                                                                 checked
                                                             </c:if>>
                                                         <label
@@ -227,34 +227,44 @@
                                     </c:choose>
                                 </div>
                                 <div class="mb-4">
-                                    <label for="previas" class="form-label">
+                                    <label class="form-label">
                                         Cursos previos
                                     </label>
-                                    <select
-                                        id="previas"
-                                        name="previas"
-                                        class="form-select"
-                                        multiple
-                                        size="5">
-                                        <c:forEach
-                                            var="nombreCurso"
-                                            items="${cursoFormulario.cursosExistentes}">
-                                            <option
-                                                value="<c:out value='${nombreCurso}'/>"
-                                                <c:if test="${cursoFormulario.previasSeleccionadas.contains(nombreCurso)}">
-                                                    selected
-                                                </c:if>>
-                                                <c:out value="${nombreCurso}" />
-                                            </option>
-
-                                        </c:forEach>
-                                    </select>
-                                    <div class="form-text">
-                                        Opcional. Puedes seleccionar ninguno, uno o varios cursos.
-                                    </div>
-                                    <div class="form-text">
-                                        Para seleccionar varios, mantené apretado CTRL.
-                                    </div>
+                                    <c:choose>
+                                        <c:when test="${not empty cursoFormulario.cursosExistentes.curso}">
+                                            <div class="border rounded p-3">
+                                                <c:forEach
+                                                    var="nombreCurso"
+                                                    items="${cursoFormulario.cursosExistentes.curso}"
+                                                    varStatus="estado">
+                                                    <div class="form-check">
+                                                        <input
+                                                            class="form-check-input"
+                                                            type="checkbox"
+                                                            name="previas"
+                                                            id="previa_${estado.index}"
+                                                            value="<c:out value='${nombreCurso}'/>"
+                                                            <c:if test="${cursoFormulario.previasSeleccionadas.previa.contains(nombreCurso)}">
+                                                                checked
+                                                            </c:if>>
+                                                        <label
+                                                            class="form-check-label"
+                                                            for="previa_${estado.index}">
+                                                            <c:out value="${nombreCurso}" />
+                                                        </label>
+                                                    </div>
+                                                </c:forEach>
+                                            </div>
+                                            <div class="form-text">
+                                                Podés seleccionar ninguno, uno o varios cursos.
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="text-muted small">
+                                                No hay otros cursos disponibles para seleccionar como previos.
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
                                 <div class="d-flex justify-content-end gap-2">
                                     <a
