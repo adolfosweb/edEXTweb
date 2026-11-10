@@ -1,0 +1,26 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%-- Barra de navegación común. TODO: mostrar el nick del usuario y habilitar "Salir" cuando exista el login. --%>
+<style>
+    .logo-ext {
+        width: 40px; height: 40px; border-radius: 50%; border: 2px solid #1d3557;
+        color: #1d3557; font-size: .7rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+    }
+</style>
+<nav class="navbar navbar-light bg-light border rounded m-2 p-2">
+    <div class="container-fluid flex-wrap">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#menu" aria-controls="menu" aria-expanded="false" aria-label="Abrir menú">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand mx-auto" href="<%= request.getContextPath() %>/movil/componentes/index.jsp">Bienvenido</a>
+        <span class="logo-ext" aria-hidden="true">EXT</span>
+        <div class="collapse navbar-collapse w-100" id="menu">
+            <ul class="navbar-nav pt-2">
+                <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath() %>/movil/cursos">Ver Cursos</a></li>
+                <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath() %>/movil/componentes/ediciones.jsp">Ver Ediciones</a></li>
+                <li class="nav-item"><a class="nav-link disabled" href="#" aria-disabled="true">Salir</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
