@@ -154,25 +154,22 @@
                                 <article class="card resultado-card shadow-sm h-100">
                                     <!-- Imagen o placeholder según el tipo de resultado -->
                                     <div class="resultado-imagen">
-                                        <c:choose>                                            
+                                        <c:choose>
+                                            <c:when test="${not empty r.imagen}">
+                                                <c:url var="urlImagen" value="/imagen">
+                                                    <c:param name="ruta" value="${r.imagen}"/>
+                                                </c:url>
+                                                <img src="${urlImagen}"
+                                                     alt="Imagen de <c:out value='${r.nombre}'/>"
+                                                     class="img-fluid"
+                                                     loading="lazy">
+                                            </c:when>
                                             <c:when test="${r.tipo == 'curso'}">
                                                 <div class="placeholder-imagen placeholder-curso">
                                                     <i class="bi bi-journal-bookmark"></i>
                                                     <span>Imagen del curso</span>
                                                 </div>
-                                            </c:when>                                          
-                                            <c:when test="${r.tipo == 'programa' and not empty r.imagen}">
-                                                <img src="<c:out value='${r.imagen}'/>"
-                                                     alt="Imagen de <c:out value='${r.nombre}'/>"
-                                                     class="img-fluid"
-                                                     loading="lazy">
-                                            </c:when>                                           
-                                            <c:when test="${r.tipo == 'usuario' and not empty r.imagen}">
-                                                <img src="<c:out value='${r.imagen}'/>"
-                                                     alt="Imagen de perfil de <c:out value='${r.nombre}'/>"
-                                                     class="img-fluid"
-                                                     loading="lazy">
-                                            </c:when>                                            
+                                            </c:when>
                                             <c:otherwise>
                                                 <div class="placeholder-imagen placeholder-generico">
                                                     <i class="${r.tipo == 'usuario' ? 'bi bi-person-circle' : 'bi bi-image'}"></i>

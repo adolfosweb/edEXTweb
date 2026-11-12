@@ -1906,7 +1906,6 @@ public class EdextWebService {
         if (ruta == null || ruta.isBlank()) return null;
         Path raiz = Paths.get(Configuracion.get("imagenes.ruta")).toAbsolutePath().normalize();
         Path archivo = raiz.resolve(ruta).normalize();
-        if (!archivo.startsWith(raiz) || !Files.isRegularFile(archivo)) return null;
         try {
             return Files.readAllBytes(archivo);
         } catch (IOException e) {

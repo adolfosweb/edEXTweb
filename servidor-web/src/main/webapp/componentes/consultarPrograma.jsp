@@ -61,16 +61,14 @@
                             <div class="col-md-4">
                                 <c:choose>
                                     <c:when test="${not empty programaSeleccionado.imagen}">
-                                        <img src="${pageContext.request.contextPath}${programaSeleccionado.imagen}"
+                                        <c:url var="urlImgPrograma" value="/imagen">
+                                            <c:param name="ruta" value="${programaSeleccionado.imagen}"/>
+                                        </c:url>
+                                        <img src="${urlImgPrograma}"
                                              class="card-img-top"
                                              alt="Portada del programa"
                                              style="height: 200px; object-fit: cover;">
                                     </c:when>
-                                    <c:otherwise>
-                                        <img src="https://placehold.co/600x300/e2e8f0/334155?text=Programa"
-                                             class="card-img-top"
-                                             alt="Programa sin imagen">
-                                    </c:otherwise>
                                 </c:choose>
                             </div>
                             <div class="col-md-8">
@@ -123,9 +121,21 @@
                         <c:forEach var="c" items="${programaSeleccionado.cursos}">
                             <div class="col-md-6 col-xl-4">
                                 <div class="card h-100 shadow-sm">
-                                    <img src="https://placehold.co/600x300/e2e8f0/334155?text=Curso"
-                                         class="curso-img card-img-top"
-                                         alt="Imagen del curso">
+                                    <c:choose>
+                                        <c:when test="${not empty c.imagen}">
+                                            <c:url var="urlImgCurso" value="/imagen">
+                                                <c:param name="ruta" value="${c.imagen}"/>
+                                            </c:url>
+                                            <img src="${urlImgCurso}"
+                                                 class="curso-img card-img-top"
+                                                 alt="Imagen del curso">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <img src="https://placehold.co/600x300/e2e8f0/334155?text=Curso"
+                                                 class="curso-img card-img-top"
+                                                 alt="Curso sin imagen">
+                                        </c:otherwise>
+                                    </c:choose>
                                     <div class="card-body">
                                         <h4 class="h5 card-title">
                                             <c:out value="${c.nombre}"/>

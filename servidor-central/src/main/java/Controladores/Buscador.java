@@ -52,7 +52,7 @@ public class Buscador {
                         curso.getNombre(),
                         curso.getDescripcion(),
                         convertirFecha(curso.getFecRegistro()),
-                        null
+                        curso.getImagen()
                     ));
                 }
             }
@@ -103,9 +103,9 @@ public class Buscador {
                         nombreVisible,
                         null,
                         null,
-                        null
+                        usuario.getImagen()
                     ));
-                }
+                }           
             }
         } finally {
             em.close();

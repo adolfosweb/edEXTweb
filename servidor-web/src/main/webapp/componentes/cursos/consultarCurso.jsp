@@ -34,11 +34,13 @@
             <div class="row g-4">
                 <div class="col-12 col-lg-5">
                     <c:choose>
-                        <c:when test="${not empty curso.url}">
-                            <img
-                                class="course-image rounded"
-                                src="<c:out value='${curso.url}'/>"
-                                alt="Imagen del curso">
+                        <c:when test="${not empty curso.imagen}">
+                            <c:url var="urlImgCurso" value="/imagen">
+                                <c:param name="ruta" value="${curso.imagen}"/>
+                            </c:url>
+                            <img class="course-image rounded"
+                                 src="${urlImgCurso}"
+                                 alt="Imagen del curso">
                         </c:when>
                         <c:otherwise>
                             <div
@@ -193,6 +195,12 @@
                         </h2>
                     </div>
                     <div class="card-body">
+                        <c:if test="${not empty edicionSeleccionada.imagen}">
+                            <c:url var="urlImgEdicion" value="/imagen">
+                                <c:param name="ruta" value="${edicionSeleccionada.imagen}"/>
+                            </c:url>
+                            <img src="${urlImgEdicion}" class="course-image rounded mb-3" alt="Imagen de la edición">
+                        </c:if>
                         <dl class="row mb-0">
                             <dt class="col-sm-4">Curso</dt>
                             <dd class="col-sm-8">
@@ -272,6 +280,12 @@
                         </h2>
                     </div>
                     <div class="card-body">
+                        <c:if test="${not empty programaSeleccionado.imagen}">
+                            <c:url var="urlImgProg" value="/imagen">
+                                <c:param name="ruta" value="${programaSeleccionado.imagen}"/>
+                            </c:url>
+                            <img src="${urlImgProg}" class="course-image rounded mb-3" alt="Imagen del programa">
+                        </c:if>
                         <dl class="row mb-0">
                             <dt class="col-sm-4">Descripción</dt>
                             <dd class="col-sm-8">
