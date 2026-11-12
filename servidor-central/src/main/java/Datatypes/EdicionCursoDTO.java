@@ -15,6 +15,8 @@ public class EdicionCursoDTO {
     private String fechaFin;
     private int cupo;
     private boolean cerrada;
+    private String imagen;
+
 
     public EdicionCursoDTO() {
     }
@@ -84,4 +86,7 @@ public class EdicionCursoDTO {
     public void setCerrada(boolean cerrada) {
         this.cerrada = cerrada;
     }
+    
+    public String getImagen() { return imagen; }
+    public void setImagen(String imagen) { this.imagen = imagen; }
 }

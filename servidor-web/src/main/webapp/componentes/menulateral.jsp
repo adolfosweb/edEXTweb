@@ -87,6 +87,15 @@
     <%
         }
     %>
+        <div>
+        <ul class="list-unstyled">
+            <li class="mb-1">
+                <a href="${pageContext.request.contextPath}/SvltTendencias"
+                   class="text-decoration-none text-white">Tendencias</a>
+            </li>
+        </ul>
+    </div>
+    <hr class="border border-light border-1 opacity-100">
     <!-- Institutos -->
     <div>
         <h6 class="text-uppercase fw-bold text-white">Institutos</h6>

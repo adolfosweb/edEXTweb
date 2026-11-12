@@ -34,6 +34,8 @@ public class Curso implements Serializable {
     private String duracion;
     private int cantHoras;
     private int cantCreditos;
+    private String imagen;
+
 
     @Temporal(TemporalType.DATE)
     private Date fecRegistro;
@@ -131,6 +133,9 @@ public class Curso implements Serializable {
     public Instituto getInstituto() {
         return instituto;
     }
+    
+    public String getImagen() { return imagen; }
+    public void setImagen(String imagen) { this.imagen = imagen; }
 
     public List<EdicionCurso> getEdiciones() {
         return ediciones;

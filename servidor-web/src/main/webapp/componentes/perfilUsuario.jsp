@@ -45,33 +45,17 @@
 
     boolean esDocente = usuario != null && "DOCENTE".equalsIgnoreCase(usuario.getTipoUsuario());
 
-    // Buscar la foto existente en imagenesUsuarios
-    String extensionFoto = "";
-    String directorioFotos = application.getRealPath("/imagenesUsuarios");
-
-    if (directorioFotos != null && !nickname.isEmpty()) {
-        String[] extensiones = {".jpg", ".jpeg", ".png"};
-
-        for (String extension : extensiones) {
-            File archivo = new File(directorioFotos,nickname + extension);
-
-            if (archivo.isFile()) {
-                extensionFoto = extension;
-                break;
-            }
-        }
-    }
-
     String urlFoto = "";
+String rutaImagen = usuario != null ? usuario.getImagen() : null;
 
-    if (!extensionFoto.isEmpty()) {
-        urlFoto = request.getContextPath()
-                + "/imagenesUsuarios/"
-                + URLEncoder.encode(nickname, "UTF-8").replace("+", "%20")
-                + extensionFoto;
-
-        urlFoto += "?v=" + System.currentTimeMillis();
+if (rutaImagen != null && !rutaImagen.isBlank()) {
+    urlFoto = request.getContextPath()
+            + "/imagen?ruta=" + URLEncoder.encode(rutaImagen, "UTF-8");
+    // Solo fuerza recarga justo después de subir una foto
+    if ("1".equals(request.getParameter("fotoActualizada"))) {
+        urlFoto += "&v=" + System.currentTimeMillis();
     }
+}
 
     // Colecciones recibidas mediante SOAP
     List<InscripcionCursoDTO> inscripcionesCursos = perfil != null ? perfil.getInscripcionesCursos() : null;
@@ -763,7 +747,31 @@
                                      role="tabpanel">
 
                                 <h2 class="h5 mb-3">Programas de formación</h2>
-
+                                
+                                <% if (esPropioPerfil) { %>
+                                    <form action="<%= request.getContextPath() %>/SvltGenerarActa" method="get"
+                                          class="row g-2 align-items-end mb-4">
+                                        <div class="col-12 col-md-8">
+                                            <label for="programaActa" class="form-label">Generar acta de estudios</label>
+                                            <select id="programaActa" name="programa" class="form-select" required>
+                                                <option value="" selected disabled>Elegí un programa de formación</option>
+                                                <% if (inscripcionesProgramas != null) {
+                                                       for (InscripcionProgramaDTO ip : inscripcionesProgramas) {
+                                                           if ("ACEPTADA".equals(ip.getEstado()) && ip.getNombrePrograma() != null) { %>
+                                                    <option value="<%= ip.getNombrePrograma() %>"><%= ip.getNombrePrograma() %></option>
+                                                <%         }
+                                                       }
+                                                   } %>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <button type="submit" class="btn btn-success w-100">
+                                                <i class="bi bi-file-earmark-pdf me-1"></i>Generar acta
+                                            </button>
+                                        </div>
+                                    </form>
+                                <% } %>
+                                
                                 <%
                                     boolean hayProgramas = false;
 

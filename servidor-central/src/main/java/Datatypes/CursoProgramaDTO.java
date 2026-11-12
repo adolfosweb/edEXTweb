@@ -10,6 +10,7 @@ public class CursoProgramaDTO {
 
     private String nombre;
     private String descripcion;
+    private String imagen;
 
     public CursoProgramaDTO() {
     }
@@ -34,4 +35,7 @@ public class CursoProgramaDTO {
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
+
+    public String getImagen() { return imagen; }
+    public void setImagen(String imagen) { this.imagen = imagen; }
 }

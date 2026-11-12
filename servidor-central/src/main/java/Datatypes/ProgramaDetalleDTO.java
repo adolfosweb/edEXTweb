@@ -13,6 +13,7 @@ public class ProgramaDetalleDTO {
     private String fechaInicio;
     private String fechaFin;
     private String fechaAlta;
+    private String imagen;
 
     @XmlElementWrapper(name = "cursos")
     @XmlElement(name = "curso")
@@ -38,6 +39,9 @@ public class ProgramaDetalleDTO {
 
     public String getFechaAlta() { return fechaAlta; }
     public void setFechaAlta(String fechaAlta) { this.fechaAlta = fechaAlta; }
+    
+    public String getImagen() { return imagen; }
+    public void setImagen(String imagen) { this.imagen = imagen; }
 
     public List<String> getNombresCursos() { return nombresCursos; }
     public void setNombresCursos(List<String> nombresCursos) {

@@ -27,6 +27,8 @@ public class EdicionCurso implements Serializable {
     private int cupo;
     private LocalDate fechaPublicacion;
     private boolean cerrada;
+    private String imagen;
+
 
     // Muchas ediciones pertenecen a un curso
     @ManyToOne
@@ -111,6 +113,9 @@ public class EdicionCurso implements Serializable {
     public boolean isCerrada(){
         return this.cerrada;
     }
+
+    public String getImagen() { return imagen; }
+    public void setImagen(String imagen) { this.imagen = imagen; }
 
     // =========================
     // CURSO

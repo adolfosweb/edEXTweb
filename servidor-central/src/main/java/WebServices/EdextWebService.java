@@ -71,6 +71,10 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.IOException;
 
 @WebService(serviceName = "EdextService",name = "EdextWebService",targetNamespace = "http://webservices.edext.com/")
 public class EdextWebService {
@@ -176,7 +180,8 @@ public class EdextWebService {
                 usuario.getNombre(),
                 usuario.getApellido(),
                 usuario.getFecNac() != null ? usuario.getFecNac().toString() : "",
-                tipoUsuario);
+                tipoUsuario,
+                usuario.getImagen());
     }
     
     // =========================
@@ -261,6 +266,7 @@ public class EdextWebService {
             dto.setApellido(usuario.getApellido());
             dto.setFecNac(usuario.getFecNac() != null ? usuario.getFecNac().toString() : null);
             dto.setTipoUsuario(usuario instanceof Estudiante ? "ESTUDIANTE" : "DOCENTE");
+            dto.setImagen(usuario.getImagen());
             resultado.add(dto);
         }
         return resultado;
@@ -584,6 +590,13 @@ public class EdextWebService {
         curso.setInstituto(new Instituto(nombreInstituto));
         curso.setPrevias(previas);
         curso.setCategorias(categoriasSeleccionadas);
+
+        // Al modificar, se conservan las visitas y la imagen del curso existente.
+        if (modoEdicion) {
+            curso.setVisitas(cursoExistente.getVisitas());
+            curso.setImagen(cursoExistente.getImagen());
+        }
+
         boolean guardado = modoEdicion ? controladorCurso.modificarCurso(curso) : controladorCurso.altaCurso(curso);
         if (!guardado) {
             return new ResultadoOperacionDTO(false,
@@ -651,6 +664,7 @@ public class EdextWebService {
             dto.setCantCreditos(curso.getCantCreditos());
             dto.setFechaRegistro(formatearFecha(curso.getFecRegistro()));
             dto.setUrl(curso.getUrl());
+            dto.setImagen(curso.getImagen());
             dto.setInstituto(curso.getInstituto() != null ? curso.getInstituto().getNombre() : null);
 
             List<String> previas = new ArrayList<>();
@@ -723,6 +737,7 @@ public class EdextWebService {
         dto.setCupo(edicion.getCupo());
         dto.setFechaPublicacion(formatearFecha(edicion.getFechaPublicacion()));
         dto.setNombreCurso(edicion.getCurso() != null ? edicion.getCurso().getNombre() : null);
+        dto.setImagen(edicion.getImagen());
 
         List<String> docentes = new ArrayList<>();
         for (Docente docente : edicion.getDocentes()) {
@@ -749,6 +764,7 @@ public class EdextWebService {
         dto.setFechaInicio(formatearFecha(programa.getFechaInicio()));
         dto.setFechaFin(formatearFecha(programa.getFechaFin()));
         dto.setFechaAlta(formatearFecha(programa.getFechaAlta()));
+        dto.setImagen(programa.getImagen());
 
         List<String> cursos = new ArrayList<>();
         for (Curso curso : programa.getCursos()) {
@@ -779,9 +795,13 @@ public class EdextWebService {
 
         return fecha.toString();
     }
+
+    // =====================================================
+    // TENDENCIAS (VISITAS A CURSOS)
+    // =====================================================
     
     @WebMethod
-    public void registrarVisitaCurso(String nombreCurso) {
+    public void registrarVisitaCurso(@WebParam(name = "nombreCurso") String nombreCurso) {
         EntityManager em = Conexion.getInstancia().getEntityManager();
         try {
             em.getTransaction().begin();
@@ -799,20 +819,20 @@ public class EdextWebService {
 
     @WebMethod
     public List<CursoTendenciaDTO> listarCursosMasVisitados() {
-    EntityManager em = Conexion.getInstancia().getEntityManager();
-    try {
-        List<Curso> cursos = em.createQuery(
-            "SELECT c FROM Curso c ORDER BY c.visitas DESC, c.nombre ASC", Curso.class)
-            .getResultList();
-        List<CursoTendenciaDTO> resultado = new ArrayList<>();
-        for (Curso c : cursos) {
-            resultado.add(new CursoTendenciaDTO(c.getNombre(), c.getVisitas()));
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        try {
+            List<Curso> cursos = em.createQuery(
+                "SELECT c FROM Curso c ORDER BY c.visitas DESC, c.nombre ASC", Curso.class)
+                .getResultList();
+            List<CursoTendenciaDTO> resultado = new ArrayList<>();
+            for (Curso c : cursos) {
+                resultado.add(new CursoTendenciaDTO(c.getNombre(), c.getVisitas()));
+            }
+            return resultado;
+        } finally {
+            em.close();
         }
-        return resultado;
-    } finally {
-        em.close();
     }
-}
     
     // =====================================
     // ALTA DE EDICIONES
@@ -1142,13 +1162,15 @@ public class EdextWebService {
             if (!nombreInstituto.equals(nombreDelInstituto)) {
                 continue;
             }
-            resultado.add(new EdicionCursoDTO(
+            EdicionCursoDTO dto = new EdicionCursoDTO(
                             edicion.getNombre(),
                             edicion.getCurso().getNombre(),
                             nombreDelInstituto,
                             edicion.getFechaInicio() != null ? edicion.getFechaInicio().toString() : "",
                             edicion.getFechaFin() != null ? edicion.getFechaFin().toString() : "",
-                            edicion.getCupo()));
+                            edicion.getCupo());
+            dto.setImagen(edicion.getImagen());
+            resultado.add(dto);
         }
         return resultado;
     }
@@ -1187,13 +1209,15 @@ public class EdextWebService {
                 cursos.put(curso.getNombre(), cursoDTO);
             }
 
-            cursoDTO.getEdiciones().add(new EdicionCursoDTO(
+            EdicionCursoDTO edicionDTO = new EdicionCursoDTO(
                     edicion.getNombre(),
                     curso.getNombre(),
                     nombreInstituto,
                     edicion.getFechaInicio() != null ? edicion.getFechaInicio().toString() : "",
                     edicion.getFechaFin() != null ? edicion.getFechaFin().toString() : "",
-                    edicion.getCupo()));
+                    edicion.getCupo());
+            edicionDTO.setImagen(edicion.getImagen());
+            cursoDTO.getEdiciones().add(edicionDTO);
         }
         resultado.addAll(cursos.values());
         return resultado;
@@ -1275,7 +1299,9 @@ public class EdextWebService {
                 if (curso == null) {
                     continue;
                 }
-                programaDTO.getCursos().add(new CursoProgramaDTO(curso.getNombre(),curso.getDescripcion()));
+                CursoProgramaDTO cursoDTO = new CursoProgramaDTO(curso.getNombre(), curso.getDescripcion());
+                cursoDTO.setImagen(curso.getImagen());
+                programaDTO.getCursos().add(cursoDTO);
 
                 // Categorías asociadas a los cursos
                 if (curso.getCategorias() != null) {
@@ -1311,6 +1337,7 @@ public class EdextWebService {
             CursoProgramaDTO dto = new CursoProgramaDTO();
             dto.setNombre(curso.getNombre());
             dto.setDescripcion(curso.getDescripcion());
+            dto.setImagen(curso.getImagen());
             resultado.add(dto);
         }
         return resultado;
@@ -1526,6 +1553,7 @@ public class EdextWebService {
                 CursoProgramaDTO dto = new CursoProgramaDTO();
                 dto.setNombre(curso.getNombre());
                 dto.setDescripcion(curso.getDescripcion());
+                dto.setImagen(curso.getImagen());
                 resultado.add(dto);
             }
         } finally {
@@ -1572,6 +1600,7 @@ public class EdextWebService {
                 dto.setFechaFin(edicion.getFechaFin() != null ? edicion.getFechaFin().toString() : null);
                 dto.setCupo(edicion.getCupo());
                 dto.setCerrada(edicion.isCerrada());
+                dto.setImagen(edicion.getImagen());
                 resultado.add(dto);
             }
         } finally {
@@ -1866,6 +1895,63 @@ public class EdextWebService {
             resultadosDTO.add(dto);
         }
         return resultadosDTO;
+    }
+
+    // =====================================================
+    // IMÁGENES (carpeta local del servidor central)
+    // =====================================================
+    
+    @WebMethod
+    public byte[] obtenerImagen(@WebParam(name = "ruta") String ruta) {
+        if (ruta == null || ruta.isBlank()) return null;
+        Path raiz = Paths.get(Configuracion.get("imagenes.ruta")).toAbsolutePath().normalize();
+        Path archivo = raiz.resolve(ruta).normalize();
+        if (!archivo.startsWith(raiz) || !Files.isRegularFile(archivo)) return null;
+        try {
+            return Files.readAllBytes(archivo);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    @WebMethod
+    public boolean guardarImagenUsuario(
+            @WebParam(name = "nickname") String nickname,
+            @WebParam(name = "extension") String extension,
+            @WebParam(name = "contenido") byte[] contenido) {
+
+        if (nickname == null || nickname.isBlank()
+                || nickname.contains("/") || nickname.contains("\\")
+                || nickname.equals(".") || nickname.equals("..")) return false;
+        if (extension == null) return false;
+        extension = extension.toLowerCase();
+        if (!extension.equals(".jpg") && !extension.equals(".jpeg") && !extension.equals(".png")) return false;
+        if (contenido == null || contenido.length == 0 || contenido.length > 5 * 1024 * 1024) return false;
+
+        EntityManager em = Conexion.getInstancia().getEntityManager();
+        try {
+            Usuario u = em.find(Usuario.class, nickname);
+            if (u == null) return false;
+
+            Path carpeta = Paths.get(Configuracion.get("imagenes.ruta"), "imagenes");
+            Files.createDirectories(carpeta);
+            Files.write(carpeta.resolve(nickname + extension), contenido);
+
+            // Borra versiones anteriores con otra extensión
+            for (String ext : new String[]{".jpg", ".jpeg", ".png"}) {
+                if (!ext.equals(extension)) Files.deleteIfExists(carpeta.resolve(nickname + ext));
+            }
+
+            em.getTransaction().begin();
+            u.setImagen("imagenes/" + nickname + extension);
+            em.getTransaction().commit();
+            return true;
+        } catch (IOException | RuntimeException e) {
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            return false;
+        } finally {
+            em.close();
+        }
     }
 
 }

@@ -16,6 +16,8 @@ public class CursoDetalleDTO {
     private String fechaRegistro;
     private String url;
     private String instituto;
+    private String imagen;
+
 
     @XmlElementWrapper(name = "previas")
     @XmlElement(name = "previa")
@@ -55,6 +57,9 @@ public class CursoDetalleDTO {
 
     public String getFechaRegistro() { return fechaRegistro; }
     public void setFechaRegistro(String fechaRegistro) { this.fechaRegistro = fechaRegistro; }
+    
+    public String getImagen() { return imagen; }
+    public void setImagen(String imagen) { this.imagen = imagen; }
 
     public String getUrl() { return url; }
     public void setUrl(String url) { this.url = url; }

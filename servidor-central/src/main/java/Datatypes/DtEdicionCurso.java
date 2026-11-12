@@ -14,6 +14,7 @@ public class DtEdicionCurso implements Serializable {
     private String nombreCurso;
     private List<String> nombresDocentes = new ArrayList<>();
     private List<String> nombresInscriptos = new ArrayList<>();
+    private String imagen;
 
     public DtEdicionCurso() {
     }
@@ -36,6 +37,7 @@ public class DtEdicionCurso implements Serializable {
     public String getNombreCurso() { return nombreCurso; }
     public List<String> getNombresDocentes() { return nombresDocentes; }
     public List<String> getNombresInscriptos() { return nombresInscriptos; }
+    public String getImagen() { return imagen; }
 
     // Setters
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -46,4 +48,5 @@ public class DtEdicionCurso implements Serializable {
     public void setNombreCurso(String nombreCurso) { this.nombreCurso = nombreCurso; }
     public void setNombresDocentes(List<String> nombresDocentes) { this.nombresDocentes = nombresDocentes; }
     public void setNombresInscriptos(List<String> nombresInscriptos) { this.nombresInscriptos = nombresInscriptos; }
+    public void setImagen(String imagen) { this.imagen = imagen; }
 }

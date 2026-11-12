@@ -14,6 +14,7 @@ public class EdicionDetalleDTO {
     private int cupo;
     private String fechaPublicacion;
     private String nombreCurso;
+    private String imagen;
 
     @XmlElementWrapper(name = "docentes")
     @XmlElement(name = "docente")
@@ -36,6 +37,9 @@ public class EdicionDetalleDTO {
 
     public int getCupo() { return cupo; }
     public void setCupo(int cupo) { this.cupo = cupo; }
+    
+    public String getImagen() { return imagen; }
+    public void setImagen(String imagen) { this.imagen = imagen; }
 
     public String getFechaPublicacion() { return fechaPublicacion; }
     public void setFechaPublicacion(String fechaPublicacion) {

@@ -27,6 +27,8 @@ public class Usuario implements Serializable {
     private LocalDate fecNac;
     @Column(nullable = false)
     private String password;
+    private String imagen;
+
 
     public Usuario() {
     }
@@ -88,6 +90,8 @@ public class Usuario implements Serializable {
     public void setPassword(String password){
         this.password = password;
     }
+    public String getImagen() { return imagen; }
+    public void setImagen(String imagen) { this.imagen = imagen; }
 
     @Override
     public int hashCode() {

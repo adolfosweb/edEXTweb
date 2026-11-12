@@ -115,27 +115,12 @@ public class ModificarImagenPerfilServlet extends HttpServlet {
                         request, nickname, "errorFoto=1"));
                 return;
             }
-            String directorio = getServletContext().getRealPath("/imagenesUsuarios");
-            if (directorio == null) {
-                throw new IOException("No se pudo resolver la carpeta de imágenes.");
-            }
-            Path carpeta = Paths.get(directorio);
-            Files.createDirectories(carpeta);
-            // Se escribe primero un archivo temporal.
-            temporal = Files.createTempFile(carpeta, "foto-", ".tmp");
-            Files.write(temporal, contenido);
-            Path destino = carpeta.resolve(nickname + extension);
-            // Reemplaza la foto actual.
-            Files.move(temporal,destino,StandardCopyOption.REPLACE_EXISTING);
-            temporal = null;
-            // Elimina las versiones anteriores con otra extensión.
-            String[] extensiones = {".jpg", ".jpeg", ".png"};
-            for (String ext : extensiones) {
-                if (!ext.equals(extension)) {
-                    Files.deleteIfExists(carpeta.resolve(nickname + ext));
-                }
-            }
-            response.sendRedirect(urlPerfil(request, nickname, "fotoActualizada=1"));
+            boolean ok = WebServices.ClienteSOAP.obtenerServicio()
+        .guardarImagenUsuario(nickname, extension, contenido);
+        if (!ok) {
+            throw new IOException("El central no pudo guardar la imagen.");
+        }
+        response.sendRedirect(urlPerfil(request, nickname, "fotoActualizada=1"));
 
         } catch (Exception e) {
             log("Error al actualizar la foto de perfil.", e);
