@@ -96,26 +96,7 @@
         </ul>
     </div>
     <hr class="border border-light border-1 opacity-100">
-    <!-- Institutos -->
-    <div>
-        <h6 class="text-uppercase fw-bold text-white">Institutos</h6>
-        <ul class="list-unstyled">
-            <c:choose>
-                <c:when test="${not empty institutosMenu}">
-                    <c:forEach var="instituto" items="${institutosMenu}">
-                        <li class="mb-1">
-                            <span class="text-decoration-none text-white">
-                                <c:out value="${instituto.nombre}" />
-                            </span>
-                        </li>
-                    </c:forEach>
-                </c:when>
-                <c:otherwise>
-                    <li class="text-secondary">No hay institutos disponibles.</li>
-                </c:otherwise>
-            </c:choose>
-        </ul>
-    </div>
+ 
     <hr class="border border-light border-1 opacity-100">
     <!-- Categorias -->
     <div>
