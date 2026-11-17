@@ -115,12 +115,17 @@ public class ModificarImagenPerfilServlet extends HttpServlet {
                         request, nickname, "errorFoto=1"));
                 return;
             }
-            boolean ok = WebServices.ClienteSOAP.obtenerServicio()
-        .guardarImagenUsuario(nickname, extension, contenido);
-        if (!ok) {
-            throw new IOException("El central no pudo guardar la imagen.");
-        }
-        response.sendRedirect(urlPerfil(request, nickname, "fotoActualizada=1"));
+                        boolean ok = WebServices.ClienteSOAP.obtenerServicio()
+                    .guardarImagenUsuario(nickname, extension, contenido);
+            if (!ok) {
+                throw new IOException("El central no pudo guardar la imagen.");
+            }
+
+            // Actualiza la sesión para que el header muestre la foto nueva sin cerrar sesión
+            usuarioSesion.setImagen("imagenes/" + nickname + extension);
+            request.getSession().setAttribute("versionFoto", System.currentTimeMillis());
+
+            response.sendRedirect(urlPerfil(request, nickname, "fotoActualizada=1"));
 
         } catch (Exception e) {
             log("Error al actualizar la foto de perfil.", e);

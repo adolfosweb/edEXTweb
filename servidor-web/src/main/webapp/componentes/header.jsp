@@ -57,29 +57,15 @@
                      Cerrar sesión
                 </a>
 
-                
                     <%
-                        String[] extensionesFoto = {".jpg", ".jpeg", ".png"};
                         String urlFoto = null;
-
-                        String directorioImagenes = application.getRealPath("/imagenesUsuarios");
-
-                        if (directorioImagenes != null && usuario != null) {
-                            java.nio.file.Path carpetaImagenes =
-                                java.nio.file.Paths.get(directorioImagenes);
-
-                            for (String extension : extensionesFoto) {
-                                java.nio.file.Path archivoFoto =
-                                    carpetaImagenes.resolve(usuario.getNickname() + extension);
-
-                                if (java.nio.file.Files.isRegularFile(archivoFoto)) {
-                                    urlFoto = request.getContextPath()
-                                        + "/imagenesUsuarios/"
-                                        + java.net.URLEncoder.encode(
-                                            usuario.getNickname(), "UTF-8")
-                                        + extension;
-                                    break;
-                                }
+                        String rutaFoto = usuario.getImagen();
+                        if (rutaFoto != null && !rutaFoto.isBlank()) {
+                            urlFoto = request.getContextPath() + "/imagen?ruta="
+                                    + java.net.URLEncoder.encode(rutaFoto, "UTF-8");
+                            Object version = session.getAttribute("versionFoto");
+                            if (version != null) {
+                                urlFoto += "&v=" + version;
                             }
                         }
                     %>

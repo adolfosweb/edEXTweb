@@ -63,6 +63,23 @@ if (rutaImagen != null && !rutaImagen.isBlank()) {
     List<InscripcionProgramaDTO> inscripcionesProgramas = perfil != null ? perfil.getInscripcionesProgramas() : null;
 
     List<EdicionPerfilDTO> edicionesDocente = perfil != null ? perfil.getEdicionesDocente() : null;
+
+    // Seguidores: usuarios que siguen a este usuario
+    List<UsuarioDTO> seguidores = new java.util.ArrayList<>();
+    if (usuario != null && !nickname.isEmpty()) {
+        try {
+            com.mycompany.edextweb.soap.EdextWebService servicioSeguidores =
+                    WebServices.ClienteSOAP.obtenerServicio();
+            for (UsuarioDTO otro : servicioSeguidores.listarUsuariosConsulta()) {
+                if (otro.getNickname() != null && !otro.getNickname().equals(nickname)
+                        && servicioSeguidores.estaSiguiendo(otro.getNickname(), nickname)) {
+                    seguidores.add(otro);
+                }
+            }
+        } catch (jakarta.xml.ws.WebServiceException e) {
+            application.log("No se pudieron cargar los seguidores de " + nickname, e);
+        }
+    }
 %>
 
 <!DOCTYPE html>
@@ -491,6 +508,14 @@ if (rutaImagen != null && !rutaImagen.isBlank()) {
                             </button>
                         <% } %>
 
+                        <button type="button"
+                                class="perfil-pestana"
+                                data-seccion="seguidores"
+                                role="tab"
+                                aria-selected="false">
+                            SEGUIDORES
+                        </button>
+
                     </div>
 
                     <div class="perfil-panel">
@@ -861,6 +886,64 @@ if (rutaImagen != null && !rutaImagen.isBlank()) {
                             </section>
 
                         <% } %>
+
+                        <!-- SEGUIDORES -->
+                        <section id="seguidores"
+                                 class="perfil-seccion"
+                                 role="tabpanel">
+
+                            <h2 class="h5 mb-3">Seguidores</h2>
+
+                            <% if (seguidores.isEmpty()) { %>
+
+                                <p class="text-secondary mb-0">
+                                    Todavía no tiene seguidores.
+                                </p>
+
+                            <% } else { %>
+
+                                <ul class="list-group">
+
+                                    <% for (UsuarioDTO seguidor : seguidores) {
+
+                                        String fotoSeguidor = "";
+                                        if (seguidor.getImagen() != null && !seguidor.getImagen().isBlank()) {
+                                            fotoSeguidor = request.getContextPath() + "/imagen?ruta="
+                                                    + URLEncoder.encode(seguidor.getImagen(), "UTF-8");
+                                        }
+                                    %>
+
+                                        <li class="list-group-item d-flex align-items-center gap-3">
+
+                                            <% if (!fotoSeguidor.isEmpty()) { %>
+                                                <img src="<%= fotoSeguidor %>"
+                                                     alt="Foto de <%= seguidor.getNickname() %>"
+                                                     class="rounded-circle"
+                                                     style="width: 40px; height: 40px; object-fit: cover;">
+                                            <% } else { %>
+                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="bi bi-person-fill"></i>
+                                                </div>
+                                            <% } %>
+
+                                            <a href="<%= request.getContextPath() %>/PerfilUsuarioServlet?nickname=<%= URLEncoder.encode(seguidor.getNickname(), "UTF-8") %>"
+                                               class="text-decoration-none">
+                                                <strong><%= seguidor.getNickname() %></strong>
+                                                <span class="text-secondary">
+                                                    <%= seguidor.getNombre() %> <%= seguidor.getApellido() %>
+                                                </span>
+                                            </a>
+
+                                        </li>
+
+                                    <% } %>
+
+                                </ul>
+
+                            <% } %>
+
+                        </section>
 
                     </div>
                 </div>

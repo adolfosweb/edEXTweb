@@ -2,6 +2,7 @@ package servlets;
 
 import WebServices.ClienteSOAP;
 import com.mycompany.edextweb.soap.CursoDetalleDTO;
+import com.mycompany.edextweb.soap.EdextWebService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -32,8 +33,8 @@ public class MovilCursoServlet extends HttpServlet {
         }
 
         try {
-            CursoDetalleDTO curso = ClienteSOAP.obtenerServicio()
-                    .consultarCursoDetalle(nombre, edicion, null);
+            EdextWebService servicio = ClienteSOAP.obtenerServicio();
+            CursoDetalleDTO curso = servicio.consultarCursoDetalle(nombre, edicion, null);
 
             if (curso == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND,
@@ -43,6 +44,8 @@ public class MovilCursoServlet extends HttpServlet {
 
             request.setAttribute("curso", curso);
             request.setAttribute("edicionSeleccionada", curso.getEdicionSeleccionada());
+            request.setAttribute("imagenCurso",
+                    ImagenesCurso.urlImagen(servicio, curso.getNombre(), request.getContextPath()));
             request.getRequestDispatcher("/movil/componentes/curso.jsp").forward(request, response);
 
         } catch (WebServiceException e) {

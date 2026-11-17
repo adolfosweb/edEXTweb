@@ -10,6 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .marco { border: 1px solid #dee2e6; border-radius: .375rem; padding: .75rem; }
+        .img-curso { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
         .img-vacia {
             width: 100%; aspect-ratio: 16 / 9; background: #2a7f8e; color: #fff;
             font-size: 2.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
@@ -23,7 +24,14 @@
         <h1 class="h5"><c:out value="${curso.nombre}"/></h1>
         <div class="small mb-2">Instituto de <c:out value="${curso.instituto}"/></div>
 
-        <div class="img-vacia"><c:out value="${curso.nombre.substring(0, 1)}"/></div>
+        <c:choose>
+            <c:when test="${not empty imagenCurso}">
+                <img class="img-curso" src="<c:out value='${imagenCurso}'/>" alt="Imagen de <c:out value='${curso.nombre}'/>">
+            </c:when>
+            <c:otherwise>
+                <div class="img-vacia"><c:out value="${curso.nombre.substring(0, 1)}"/></div>
+            </c:otherwise>
+        </c:choose>
 
         <c:if test="${not empty curso.url}">
             <c:set var="enlace" value="${fn:startsWith(curso.url, 'http') ? curso.url : 'https://'.concat(curso.url)}"/>

@@ -15,7 +15,9 @@ import jakarta.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 @WebServlet(name = "MovilCursosServlet", urlPatterns = {"/movil/cursos"})
@@ -27,6 +29,7 @@ public class MovilCursosServlet extends HttpServlet {
 
         List<CursoListadoDTO> cursos = new ArrayList<>();
         TreeSet<String> institutos = new TreeSet<>();
+        Map<String, String> imagenes = new HashMap<>();
         String elegido = request.getParameter("instituto");
         if (elegido != null && elegido.isBlank()) {
             elegido = null;
@@ -35,7 +38,7 @@ public class MovilCursosServlet extends HttpServlet {
         try {
             EdextWebService servicio = ClienteSOAP.obtenerServicio();
 
-            // Sin sesión todavía: se pide el listado sin usuario (igual que un visitante).
+            // Sin sesión de web todavía: se pide el listado sin usuario (igual que un visitante).
             ListadoCursosDTO listado = servicio.listarCursosParaWeb(null);
             List<CursoListadoDTO> todos = listado != null ? listado.getCursos() : Collections.emptyList();
 
@@ -47,6 +50,12 @@ public class MovilCursosServlet extends HttpServlet {
                     cursos.add(c);
                 }
             }
+
+            // Imagen de cada curso que se va a mostrar.
+            for (CursoListadoDTO c : cursos) {
+                imagenes.put(c.getNombre(),
+                        ImagenesCurso.urlImagen(servicio, c.getNombre(), request.getContextPath()));
+            }
         } catch (WebServiceException e) {
             request.setAttribute("mensajeError",
                     "No se pudo conectar con el servidor central. Intente nuevamente.");
@@ -55,6 +64,7 @@ public class MovilCursosServlet extends HttpServlet {
         request.setAttribute("cursos", cursos);
         request.setAttribute("institutos", institutos);
         request.setAttribute("institutoElegido", elegido);
+        request.setAttribute("imagenes", imagenes);
 
         request.getRequestDispatcher("/movil/componentes/cursos.jsp").forward(request, response);
     }

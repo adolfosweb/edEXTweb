@@ -30,7 +30,13 @@ public class ImagenServlet extends HttpServlet {
                 return;
             }
             response.setContentType(tipo);
-            response.setHeader("Cache-Control", "private, max-age=300");
+            String etag = "\"" + Integer.toHexString(java.util.Arrays.hashCode(datos)) + "\"";
+            if (etag.equals(request.getHeader("If-None-Match"))) {
+                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                return;
+            }
+            response.setHeader("ETag", etag);
+            response.setHeader("Cache-Control", "private, no-cache");
             response.setContentLength(datos.length);
             response.getOutputStream().write(datos);
         } catch (WebServiceException e) {
