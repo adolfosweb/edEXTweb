@@ -96,24 +96,6 @@
         </ul>
     </div>
     <hr class="border border-light border-1 opacity-100">
- 
-    <hr class="border border-light border-1 opacity-100">
-    <!-- Categorias -->
-    <div>
-        <h6 class="text-uppercase text-secondary fw-bold text-white">Categorias</h6>
-        <ul class="list-unstyled">
-            <li class="mb-1">
-                <a href="#" class="text-decoration-none text-white">Programacion</a>
-            </li>
-            <li class="mb-1">
-                <a href="#" class="text-decoration-none text-white">Matematica</a>
-            </li>
-            <li class="mb-1">
-                <a href="#" class="text-decoration-none text-white">Informatica</a>
-            </li>
-        </ul>
-    </div>
-    <hr class="border border-light border-1 opacity-100">
     <%
         if (usuario != null) {
     %>

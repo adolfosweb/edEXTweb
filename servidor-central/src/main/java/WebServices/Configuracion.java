@@ -12,7 +12,7 @@ public class Configuracion {
     private static final String NOMBRE_ARCHIVO = "servidor.properties";
 
     private static final Path ARCHIVO =
-            Paths.get(System.getProperty("user.home"), ".edEXT", NOMBRE_ARCHIVO);
+            Paths.get(System.getProperty("user.home"), ".edext", NOMBRE_ARCHIVO);
     private static final Properties props = new Properties();
 
     static {
