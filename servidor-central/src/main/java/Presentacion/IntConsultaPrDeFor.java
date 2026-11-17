@@ -292,7 +292,11 @@ public class IntConsultaPrDeFor extends javax.swing.JInternalFrame {
         jTextArea1.setText(programa.getDescripcion());
         jFormattedTextField1.setText(programa.getFechaInicio().toString());
         jFormattedTextField2.setText(programa.getFechaFin().toString());
-        jFormattedTextField3.setText(programa.getFechaAlta().toString());
+        if (programa.getFechaAlta() != null) {
+            jFormattedTextField3.setText(programa.getFechaAlta().toString());
+        } else {
+             jFormattedTextField3.setText("");
+        };
         
         jComboBox2.removeAllItems();
         for(Curso c : programa.getCursos()){

@@ -20,6 +20,16 @@ import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import java.awt.Image;
 import java.io.File;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JList;
+import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 
 /**
  *
@@ -35,29 +45,40 @@ public class IntConsultarUsuario extends javax.swing.JInternalFrame {
      * Creates new form IntConsultarUsuario
      */
     public IntConsultarUsuario() {
-        initComponents();
-        cardLayout = (CardLayout) panelInfo.getLayout();
-        fabric = Fabric.getInstancia();
-        controladorUsuario = fabric.getControladorUsuario();
-        controladorPrograma = fabric.getControladorPrograma();
-        for (Usuario u : controladorUsuario.listarUsuarios().values()) {
-            comboUsuario.addItem(u.getNickname());
-        }
-        comboUsuario.setSelectedIndex(-1);
-        jList1.setModel(new javax.swing.DefaultListModel<>());
-        jList2.setModel(new javax.swing.DefaultListModel<>());
-        jList3.setModel(new javax.swing.DefaultListModel<>());
-        jList5.setModel(new javax.swing.DefaultListModel<>());
-        jList6.setModel(new javax.swing.DefaultListModel<>());
-        lbValorNick.setText("");
-        lbValorName.setText("");
-        lbValorApellido.setText("");
-        lbValorMail.setText("");
-        lbValorFechaNacimiento.setText("");
-        lbValorTipo.setText("");
-        
-        
+    initComponents();
+
+    cardLayout = (CardLayout) panelInfo.getLayout();
+
+    fabric = Fabric.getInstancia();
+    controladorUsuario = fabric.getControladorUsuario();
+    controladorPrograma = fabric.getControladorPrograma();
+
+    for (Usuario u : controladorUsuario.listarUsuarios().values()) {
+        comboUsuario.addItem(u.getNickname());
     }
+
+    comboUsuario.setSelectedIndex(-1);
+
+    jList1.setModel(new javax.swing.DefaultListModel<>());
+    jList2.setModel(new javax.swing.DefaultListModel<>());
+    jList3.setModel(new javax.swing.DefaultListModel<>());
+    jList5.setModel(new javax.swing.DefaultListModel<>());
+    jList6.setModel(new javax.swing.DefaultListModel<>());
+
+    // Configuración visual de las listas
+    configurarListas();
+
+    // Eventos de doble clic
+    configurarEventosListas();
+
+    // Limpiar datos iniciales
+    lbValorNick.setText("");
+    lbValorName.setText("");
+    lbValorApellido.setText("");
+    lbValorMail.setText("");
+    lbValorFechaNacimiento.setText("");
+    lbValorTipo.setText("");
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -110,7 +131,7 @@ public class IntConsultarUsuario extends javax.swing.JInternalFrame {
         setResizable(true);
         setAutoscrolls(true);
         setMaximumSize(new java.awt.Dimension(693, 725));
-        setPreferredSize(new java.awt.Dimension(663, 638));
+        setPreferredSize(new java.awt.Dimension(663, 667));
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameActivated(evt);
@@ -151,16 +172,21 @@ public class IntConsultarUsuario extends javax.swing.JInternalFrame {
         panelDocenteLayout.setHorizontalGroup(
             panelDocenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelDocenteLayout.createSequentialGroup()
-                .addGap(40, 40, 40)
                 .addGroup(panelDocenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel5))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 59, Short.MAX_VALUE)
-                .addGroup(panelDocenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelDocenteLayout.createSequentialGroup()
+                        .addGap(40, 40, 40)
+                        .addGroup(panelDocenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel3))
+                        .addGap(25, 25, 25))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelDocenteLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel5)
+                        .addGap(18, 18, 18)))
+                .addGroup(panelDocenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2)
+                    .addComponent(jScrollPane3))
                 .addGap(34, 34, 34))
         );
         panelDocenteLayout.setVerticalGroup(
@@ -168,26 +194,26 @@ public class IntConsultarUsuario extends javax.swing.JInternalFrame {
             .addGroup(panelDocenteLayout.createSequentialGroup()
                 .addGroup(panelDocenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelDocenteLayout.createSequentialGroup()
-                        .addGap(14, 14, 14)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(30, 30, 30)
+                        .addComponent(jLabel3))
+                    .addGroup(panelDocenteLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(panelDocenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelDocenteLayout.createSequentialGroup()
                         .addGap(30, 30, 30)
-                        .addComponent(jLabel3)))
+                        .addComponent(jLabel4))
+                    .addGroup(panelDocenteLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(panelDocenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelDocenteLayout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(panelDocenteLayout.createSequentialGroup()
-                        .addGap(29, 29, 29)
-                        .addComponent(jLabel4)))
-                .addGroup(panelDocenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelDocenteLayout.createSequentialGroup()
-                        .addGap(29, 29, 29)
-                        .addComponent(jLabel5))
-                    .addGroup(panelDocenteLayout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelDocenteLayout.createSequentialGroup()
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(23, 23, 23))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelDocenteLayout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addGap(58, 58, 58))))
         );
 
         panelInfo.add(panelDocente, "docente");
@@ -209,15 +235,15 @@ public class IntConsultarUsuario extends javax.swing.JInternalFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEstudianteLayout.createSequentialGroup()
                 .addGroup(panelEstudianteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelEstudianteLayout.createSequentialGroup()
-                        .addGap(49, 49, 49)
-                        .addComponent(jLabel8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(panelEstudianteLayout.createSequentialGroup()
                         .addGap(24, 24, 24)
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel7))
+                    .addGroup(panelEstudianteLayout.createSequentialGroup()
+                        .addGap(49, 49, 49)
+                        .addComponent(jLabel8)))
+                .addGap(18, 18, 18)
+                .addGroup(panelEstudianteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 384, Short.MAX_VALUE)
+                    .addComponent(jScrollPane5))
                 .addGap(36, 36, 36))
         );
         panelEstudianteLayout.setVerticalGroup(
@@ -225,19 +251,18 @@ public class IntConsultarUsuario extends javax.swing.JInternalFrame {
             .addGroup(panelEstudianteLayout.createSequentialGroup()
                 .addGroup(panelEstudianteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelEstudianteLayout.createSequentialGroup()
-                        .addGap(35, 35, 35)
-                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(panelEstudianteLayout.createSequentialGroup()
                         .addGap(59, 59, 59)
-                        .addComponent(jLabel7)))
+                        .addComponent(jLabel7))
+                    .addGroup(panelEstudianteLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGroup(panelEstudianteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelEstudianteLayout.createSequentialGroup()
-                        .addGap(34, 34, 34)
-                        .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(54, 54, 54)
+                        .addComponent(jLabel8))
                     .addGroup(panelEstudianteLayout.createSequentialGroup()
-                        .addGap(55, 55, 55)
-                        .addComponent(jLabel8)))
-                .addGap(10, 10, 10))
+                        .addGap(33, 33, 33)
+                        .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
 
         panelInfo.add(panelEstudiante, "estudiante");
@@ -364,17 +389,17 @@ public class IntConsultarUsuario extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap(23, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(136, 136, 136)
-                        .addComponent(panelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(33, 33, 33)
+                        .addComponent(panelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 565, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(262, 262, 262)
+                        .addGap(281, 281, 281)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -394,11 +419,11 @@ public class IntConsultarUsuario extends javax.swing.JInternalFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(panelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(panelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
 
         pack();
@@ -410,25 +435,29 @@ public class IntConsultarUsuario extends javax.swing.JInternalFrame {
 
     private void comboUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboUsuarioActionPerformed
         // TODO add your handling code here:
-        String nickname = (String) comboUsuario.getSelectedItem();
+          String nickname = (String) comboUsuario.getSelectedItem();
 
-        if (nickname == null) {
+    if (nickname == null) {
         return;
     }
-        Usuario usuario = controladorUsuario.buscarUsuario(nickname);
 
-        cargarDatosUsuario(usuario);
+    Usuario usuario = controladorUsuario.buscarUsuario(nickname);
 
-        if (usuario instanceof Docente) {
-            cargarDatosDocente((Docente) usuario);
-        } else if (usuario instanceof Estudiante) {
-            cargarDatosEstudiante((Estudiante) usuario);
-        }
-        
-        if (usuario != null) {
-        cargarDatosUsuario(usuario);
-        cargarImagenUsuario(usuario.getNickname());
-}
+    if (usuario == null) {
+        return;
+    }
+
+    cargarDatosUsuario(usuario);
+    cargarImagenUsuario(usuario.getNickname());
+
+    if (usuario instanceof Docente) {
+        cargarDatosDocente((Docente) usuario);
+    } else if (usuario instanceof Estudiante) {
+        cargarDatosEstudiante((Estudiante) usuario);
+    } else {
+        panelInfo.setVisible(false);
+    }
+
         
     }//GEN-LAST:event_comboUsuarioActionPerformed
     
@@ -555,6 +584,194 @@ public class IntConsultarUsuario extends javax.swing.JInternalFrame {
 
         jList6.setModel(modeloProgramas);
     }
+    
+    private void configurarListas() {
+    JList<?>[] listas = {
+        jList1, jList2, jList3, jList5, jList6
+    };
+
+    for (JList<?> lista : listas) {
+        lista.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        lista.setFixedCellHeight(30);
+        lista.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lista.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        lista.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                    JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+
+                JLabel etiqueta = (JLabel) super.getListCellRendererComponent(
+                        list, value, index, isSelected, cellHasFocus);
+
+                etiqueta.setBorder(
+                        BorderFactory.createEmptyBorder(4, 8, 4, 8));
+
+                if (isSelected) {
+                    etiqueta.setBackground(new Color(210, 225, 245));
+                    etiqueta.setForeground(Color.BLACK);
+                }
+
+                return etiqueta;
+            }
+        });
+    }
+}
+    
+    private void configurarEventosListas() {
+
+    // Cursos del docente
+    jList1.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent evt) {
+            if (evt.getClickCount() == 2) {
+                String nombre = jList1.getSelectedValue();
+
+                if (nombre != null) {
+                    Curso curso = fabric.getControladorCurso()
+                            .buscarCurso(nombre);
+
+                    if (curso != null) {
+                        abrirVentana(new IntConsultaCurso(curso));
+                    }
+                }
+            }
+        }
+    });
+
+    // Ediciones del docente
+    jList2.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent evt) {
+            if (evt.getClickCount() == 2) {
+                EdicionCurso edicion = obtenerEdicionSeleccionada(
+                        jList2.getSelectedValue());
+
+                abrirConsultaEdicion(edicion);
+            }
+        }
+    });
+
+    // Programas del docente
+    jList3.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent evt) {
+            if (evt.getClickCount() == 2) {
+                abrirConsultaPrograma(jList3.getSelectedValue());
+            }
+        }
+    });
+
+    // Ediciones del estudiante
+    jList5.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent evt) {
+            if (evt.getClickCount() == 2) {
+                String nombre = jList5.getSelectedValue();
+
+                if (nombre != null) {
+                    for (InscripcionCurso inscripcion :
+                            ((Estudiante) controladorUsuario.buscarUsuario(
+                                    (String) comboUsuario.getSelectedItem())).getCursos()) {
+
+                        EdicionCurso edicion = inscripcion.getCurso();
+
+                        if (edicion != null && edicion.toString().equals(nombre)) {
+                            abrirConsultaEdicion(edicion);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Programas del estudiante
+    jList6.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent evt) {
+            if (evt.getClickCount() == 2) {
+                abrirConsultaPrograma(jList6.getSelectedValue());
+            }
+        }
+    });
+}
+    
+    private void abrirVentana(JInternalFrame ventana) {
+    if (getDesktopPane() != null) {
+        getDesktopPane().add(ventana);
+        ventana.setVisible(true);
+        ventana.toFront();
+    }
+}
+
+private void abrirConsultaPrograma(String nombre) {
+    if (nombre == null) {
+        return;
+    }
+
+    ProgramaFormacion programa =
+            controladorPrograma.buscarPrograma(nombre);
+
+    if (programa != null) {
+        abrirVentana(new IntConsultaPrDeFor(controladorPrograma, programa));
+    }
+}
+
+private EdicionCurso obtenerEdicionSeleccionada(String nombre) {
+    if (nombre == null) {
+        return null;
+    }
+
+    for (EdicionCurso edicion :
+            fabric.getControladorCurso().listarEdiciones().values()) {
+
+        if (edicion.toString().equals(nombre)
+                || edicion.getNombre().equals(nombre)) {
+            return edicion;
+        }
+    }
+
+    return null;
+}
+
+private void configurarLista(JList<String> lista) {
+    lista.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+    lista.setFixedCellHeight(32);
+    lista.setSelectionBackground(new Color(200, 220, 245));
+    lista.setSelectionForeground(Color.BLACK);
+    lista.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
+
+    lista.setCellRenderer(new DefaultListCellRenderer() {
+        @Override
+        public Component getListCellRendererComponent(
+                JList<?> list, Object value, int index,
+                boolean isSelected, boolean cellHasFocus) {
+
+            JLabel label = (JLabel) super.getListCellRendererComponent(
+                    list, value, index, isSelected, cellHasFocus);
+
+            label.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
+
+            return label;
+        }
+    });
+}
+
+private void abrirConsultaEdicion(EdicionCurso edicion) {
+    if (edicion == null || edicion.getCurso() == null
+            || edicion.getCurso().getInstituto() == null) {
+        return;
+    }
+
+    IntConsultaEdCurso ventana = new IntConsultaEdCurso(
+            edicion.getCurso().getInstituto().getNombre(),
+            edicion.getCurso().getNombre(),
+            edicion.getNombre()
+    );
+
+    abrirVentana(ventana);
+}
     private void lbValorNickActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lbValorNickActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_lbValorNickActionPerformed
