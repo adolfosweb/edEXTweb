@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -16,9 +17,14 @@
     <artifactId>servidor-web</artifactId>
     <packaging>war</packaging>
 
+    <properties>
+        <!-- URL del servidor central.
+             Se puede sobrescribir desde la terminal -->
+        <central.url>http://localhost:8081/edext/edext</central.url>
+    </properties>
+
     <dependencies>
 
-        <!-- Jakarta EE: proporcionado por Tomcat / servidor de despliegue -->
         <dependency>
             <groupId>jakarta.platform</groupId>
             <artifactId>jakarta.jakartaee-api</artifactId>
@@ -26,7 +32,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSTL -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
             <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
@@ -39,21 +44,19 @@
             <version>3.0.1</version>
         </dependency>
 
-        <!-- Cliente SOAP: comunicación con el Servidor Central -->
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
             <version>4.0.3</version>
         </dependency>
 
-        <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.11.4</version>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>
@@ -67,13 +70,11 @@
 
         <plugins>
 
-            <!-- Compilación Java: la versión se hereda del POM principal -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
 
-            <!-- Generación del WAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -83,14 +84,12 @@
                 </configuration>
             </plugin>
 
-            <!-- Pruebas JUnit 5 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.2</version>
             </plugin>
 
-            <!-- Cobertura de código -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -110,7 +109,8 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
+            <!-- Generación del cliente SOAP -->
             <plugin>
                 <groupId>com.sun.xml.ws</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
@@ -127,10 +127,13 @@
 
                 <configuration>
                     <wsdlUrls>
-                        <wsdlUrl>http://localhost:8081/edext/edext?wsdl</wsdlUrl>
+                        <wsdlUrl>${central.url}?wsdl</wsdlUrl>
                     </wsdlUrls>
 
-                    <packageName>com.mycompany.edextweb.soap</packageName>
+                    <packageName>
+                        com.mycompany.edextweb.soap
+                    </packageName>
+
                     <keep>true</keep>
                 </configuration>
             </plugin>
